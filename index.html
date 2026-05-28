@@ -1,0 +1,2928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stone — Protótipos Open Finance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Manrope", -apple-system, system-ui, sans-serif;
+    background: radial-gradient(1200px 800px at 50% -10%, #20342c 0%, #141a18 55%, #0d100f 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  .tabbar { display: flex; gap: 8px; padding: 22px 16px 14px; flex-wrap: wrap; justify-content: center; }
+  .tab {
+    padding: 10px 20px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06);
+    color: #cfe9dd; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .tab:hover { background: rgba(255,255,255,.12); }
+  .tab.active { background: #2DA56F; border-color: #2DA56F; color: #fff; }
+  .stage { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; padding: 0 0 22px; }
+  .frame { width: 422px; height: 900px; max-width: 100%; max-height: calc(100vh - 96px); border: 0; background: transparent; }
+  .frame.hidden { display: none; }
+  @media (max-width: 460px) {
+    .tabbar { padding: 14px 10px 10px; }
+    .stage { padding: 0; }
+    .frame { width: 100vw; height: calc(100vh - 64px); max-height: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="tabbar">
+    <button class="tab active" data-target="frame-chat">💬 Consultor IA</button>
+    <button class="tab" data-target="frame-boleto">🧾 Pagar boleto</button>
+    <button class="tab" data-target="frame-trazer">🔄 Trazer saldo</button>
+  </div>
+  <div class="stage">
+<iframe class="frame" id="frame-chat" title="Consultor IA" loading="eager" srcdoc="<!DOCTYPE html>
+<html lang=&quot;pt-BR&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot; />
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; />
+<title>Consultor Minhas Finanças</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; />
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin />
+<link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap&quot; rel=&quot;stylesheet&quot; />
+<style>
+  :root {
+    --green-top: #1B6049;
+    --green-bottom: #0A2E22;
+    --header: #11463400;
+    --user-bubble: #2F9D69;
+    --user-text: #ffffff;
+    --bot-bubble: #EAF4EE;
+    --bot-text: #123A2C;
+    --bot-meta: #5C7A6E;
+    --card-btn-bg: #ffffff;
+    --card-btn-text: #163C2D;
+    --accent: #6FC09C;
+    --accent-strong: #2DA56F;
+    --pin-active: #2DA56F;
+    --pin-border: #D7DEDB;
+    --ink: #14241D;
+    --muted: #8A968F;
+    --key-bg: #FBFBFC;
+    --key-shadow: #C9CDD2;
+    --frame-radius: 44px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: &quot;Manrope&quot;, -apple-system, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 800px at 50% -10%, #20342c 0%, #141a18 55%, #0d100f 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Phone frame ---------- */
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    max-height: calc(100vh - 48px);
+    aspect-ratio: 390 / 844;
+    background: #000;
+    border-radius: var(--frame-radius);
+    padding: 12px;
+    box-shadow:
+      0 0 0 2px #2a2a2a,
+      0 40px 80px -20px rgba(0,0,0,.65),
+      0 12px 30px -8px rgba(0,0,0,.5);
+  }
+
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: calc(var(--frame-radius) - 12px);
+    overflow: hidden;
+    background: var(--green-bottom);
+  }
+
+  /* notch */
+  .notch {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 130px; height: 26px;
+    background: #000;
+    border-radius: 0 0 18px 18px;
+    z-index: 60;
+  }
+
+  /* ---------- Views ---------- */
+  .view {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transition: opacity .28s ease, transform .32s ease;
+  }
+  .view.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(8%);
+  }
+
+  /* ---------- Status bar ---------- */
+  .statusbar {
+    height: 44px;
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 30;
+  }
+  .statusbar .time { letter-spacing: .3px; }
+  .statusbar .icons { display: flex; align-items: center; gap: 6px; }
+  .statusbar svg { display: block; }
+
+  /* ===================== CHAT VIEW ===================== */
+  #chatView .statusbar { color: #fff; }
+
+  .chat-header {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 36px 1fr 36px;
+    align-items: center;
+    padding: 4px 14px 14px;
+    color: #fff;
+    background: linear-gradient(180deg, var(--green-top), rgba(27,96,73,0));
+  }
+  .chat-header .back {
+    background: none; border: 0; cursor: pointer;
+    color: #fff; display: grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 50%;
+  }
+  .chat-header .back:active { background: rgba(255,255,255,.12); }
+  .chat-header .title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .chat-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 8px 16px 4px;
+    background: linear-gradient(180deg, var(--green-top) 0%, var(--green-bottom) 70%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+  }
+  .chat-body::-webkit-scrollbar { width: 0; }
+
+  .intro {
+    text-align: center;
+    color: #fff;
+    margin: 14px 18px 6px;
+  }
+  .intro .hi {
+    font-size: 22px;
+    font-weight: 800;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  .intro p {
+    margin-top: 8px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: rgba(255,255,255,.82);
+  }
+
+  .daysep {
+    align-self: center;
+    color: rgba(255,255,255,.6);
+    font-size: 11px;
+    font-weight: 600;
+    margin: 4px 0;
+  }
+
+  /* message rows */
+  .row { display: flex; width: 100%; }
+  .row.bot { justify-content: flex-start; }
+  .row.user { justify-content: flex-end; }
+
+  .bubble {
+    max-width: 84%;
+    border-radius: 16px;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.45;
+    position: relative;
+    animation: pop .26s ease both;
+    word-wrap: break-word;
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .bubble.bot {
+    background: var(--bot-bubble);
+    color: var(--bot-text);
+    border-bottom-left-radius: 6px;
+  }
+  .bubble.user {
+    background: var(--user-bubble);
+    color: var(--user-text);
+    border-bottom-right-radius: 6px;
+  }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .bubble.bot .meta { color: #1d6b4e; }
+  .bubble.user .meta { color: rgba(255,255,255,.9); justify-content: flex-end; }
+  .meta .t { font-weight: 600; opacity: .7; }
+  .meta .spark { font-size: 12px; }
+
+  .bubble .line { display: block; }
+  .bubble .group { margin-top: 8px; }
+  .bubble .group:first-child { margin-top: 0; }
+  .bubble .ghead { font-weight: 700; display: flex; gap: 6px; align-items: center; }
+  .bubble .gitem { padding-left: 4px; opacity: .95; }
+  .bubble .total {
+    margin-top: 10px;
+    font-weight: 800;
+    font-size: 13.5px;
+  }
+  .bubble .ask { margin-top: 10px; }
+
+  /* data rows for pix card */
+  .datarow { display: flex; gap: 7px; align-items: baseline; margin: 3px 0; }
+  .datarow .ic { width: 16px; }
+  .datarow .k { font-weight: 700; }
+
+  /* card buttons */
+  .cardbtns { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .cardbtn {
+    width: 100%;
+    border: 1px solid #dfe7e2;
+    background: var(--card-btn-bg);
+    color: var(--card-btn-text);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform .12s ease, background .15s ease;
+  }
+  .cardbtn:hover { background: #f4f8f6; }
+  .cardbtn:active { transform: scale(.985); }
+  .cardbtn.icon { display: flex; gap: 8px; align-items: center; justify-content: center; }
+
+  .feedback {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: #2a6b4f;
+  }
+  .feedback button {
+    border: 0; background: none; cursor: pointer; font-size: 14px;
+    opacity: .7; transition: opacity .15s, transform .12s;
+  }
+  .feedback button:hover { opacity: 1; transform: scale(1.15); }
+
+  /* typing indicator */
+  .typing {
+    background: var(--bot-bubble);
+    border-radius: 16px;
+    border-bottom-left-radius: 6px;
+    padding: 12px 14px;
+    display: inline-flex;
+    gap: 4px;
+  }
+  .typing span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #5b8a73;
+    animation: blink 1.2s infinite ease-in-out;
+  }
+  .typing span:nth-child(2){ animation-delay: .2s; }
+  .typing span:nth-child(3){ animation-delay: .4s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: .3; transform: translateY(0); }
+    40% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  .autonote {
+    text-align: center;
+    color: rgba(255,255,255,.55);
+    font-size: 10.5px;
+    padding: 6px 0 4px;
+    background: var(--green-bottom);
+  }
+
+  /* input bar */
+  .inputbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px 22px;
+    background: var(--green-bottom);
+  }
+  .inputbar form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 22px;
+    padding: 0 6px 0 16px;
+  }
+  .inputbar input {
+    flex: 1;
+    background: none;
+    border: 0;
+    outline: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 13.5px;
+    padding: 12px 0;
+  }
+  .inputbar input::placeholder { color: rgba(255,255,255,.55); }
+  .inputbar .send {
+    border: 0; cursor: pointer; background: none;
+    width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; color: #fff;
+  }
+  .inputbar .send:active { background: rgba(255,255,255,.12); }
+
+  /* ===================== PIN VIEW ===================== */
+  #pinView { background: #fff; color: var(--ink); }
+  #pinView .statusbar { color: #111; }
+
+  .pin-top { padding: 4px 22px 0; }
+  .pin-back {
+    background: none; border: 0; cursor: pointer; color: #111;
+    width: 36px; height: 36px; margin-left: -8px;
+    display: grid; place-items: center; border-radius: 50%;
+  }
+  .pin-back:active { background: #f0f0f0; }
+
+  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; }
+  .pin-main h1 { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
+  .pin-main .sub { margin-top: 8px; color: var(--muted); font-size: 14px; }
+
+  .pin-boxes {
+    display: flex;
+    gap: 10px;
+    margin-top: 34px;
+  }
+  .pin-box {
+    flex: 1;
+    aspect-ratio: 1 / 1.15;
+    max-width: 46px;
+    border: 1.5px solid var(--pin-border);
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  .pin-box.active {
+    border-color: var(--pin-active);
+    box-shadow: 0 0 0 3px rgba(45,165,111,.14);
+  }
+  .pin-box.filled::after {
+    content: &quot;&quot;;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: var(--ink);
+    animation: pop .18s ease;
+  }
+  .pin-box.caret { border-color: var(--pin-active); }
+
+  .continuar {
+    margin-top: 30px;
+    width: 100%;
+    border: 0;
+    border-radius: 26px;
+    padding: 15px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    background: #EDEDED;
+    color: #B5B5B5;
+    cursor: not-allowed;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .2s ease, color .2s ease;
+  }
+  .continuar.enabled {
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  .continuar.enabled:active { transform: scale(.99); }
+  .continuar .spin { display: none; }
+  .continuar.enabled .spin { display: inline-grid; }
+  .continuar.loading .spin svg { animation: rot .8s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+
+  /* keypad */
+  .keypad {
+    flex: 0 0 auto;
+    background: #D2D5DB;
+    padding: 8px 6px 26px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px 6px;
+  }
+  .key {
+    height: 46px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--key-bg);
+    box-shadow: 0 1px 0 var(--key-shadow);
+    font-family: inherit;
+    font-size: 24px;
+    font-weight: 500;
+    color: #0b0b0b;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: background .08s ease;
+  }
+  .key:active { background: #c2c6cc; }
+  .key.fn {
+    background: transparent;
+    box-shadow: none;
+    font-size: 20px;
+    color: #0b0b0b;
+  }
+  .key.fn:active { background: rgba(0,0,0,.06); }
+  .key.blank { background: transparent; box-shadow: none; cursor: default; }
+
+  /* ===================== WHATSAPP VIEW ===================== */
+  #whatsAppView { background: #0b141a; }
+  #whatsAppView .statusbar { color: #e9edef; }
+
+  .wa-header {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 28px 40px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 12px 12px;
+    background: #1f2c34;
+    color: #e9edef;
+  }
+  .wa-header .back {
+    background: none; border: 0; cursor: pointer; color: #e9edef;
+    width: 28px; height: 28px; display: grid; place-items: center;
+    border-radius: 50%; margin-left: -4px;
+  }
+  .wa-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #2DA56F, #0e5b3c);
+    display: grid; place-items: center;
+    color: #fff; font-weight: 800; font-size: 18px;
+  }
+  .wa-title { display: flex; align-items: center; gap: 5px; font-size: 16px; font-weight: 700; }
+  .wa-title .check { color: #53bdeb; display: grid; place-items: center; }
+
+  .wa-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 16px 14px;
+    background-color: #0b141a;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(255,255,255,.025) 0 2px, transparent 3px),
+      radial-gradient(circle at 78% 32%, rgba(255,255,255,.025) 0 2px, transparent 3px),
+      radial-gradient(circle at 38% 62%, rgba(255,255,255,.02) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 82%, rgba(255,255,255,.02) 0 2px, transparent 3px);
+    background-size: 220px 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wa-body::-webkit-scrollbar { width: 0; }
+
+  .wa-daysep {
+    align-self: center;
+    background: #1f2c34;
+    color: #8696a0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+
+  .wa-msg {
+    align-self: flex-start;
+    max-width: 86%;
+    background: #1f2c34;
+    color: #e9edef;
+    border-radius: 10px;
+    border-top-left-radius: 3px;
+    padding: 8px 10px 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 1px 1px rgba(0,0,0,.3);
+  }
+  .wa-msg .wave { font-size: 14px; }
+  .wa-msg .wa-time { font-size: 10px; color: #8696a0; text-align: right; margin-top: 3px; }
+  .wa-cta {
+    margin-top: 8px;
+    border-top: 1px solid rgba(255,255,255,.12);
+    padding-top: 6px;
+  }
+  .wa-cta button {
+    width: 100%;
+    background: none; border: 0; cursor: pointer;
+    color: #4fc28a;
+    font-family: inherit; font-size: 13.5px; font-weight: 700;
+    padding: 6px 0 2px;
+  }
+  .wa-cta button:active { opacity: .7; }
+
+  .wa-inputbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 22px;
+    background: #0b141a;
+  }
+  .wa-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #1f2c34;
+    border-radius: 24px;
+    padding: 10px 14px;
+    color: #8696a0;
+    font-size: 13.5px;
+  }
+  .wa-field .ph { flex: 1; }
+  .wa-field svg, .wa-inputbar .wa-cam svg { display: block; }
+  .wa-cam {
+    background: none; border: 0; color: #8696a0;
+    display: grid; place-items: center; cursor: pointer;
+  }
+  .wa-mic {
+    width: 46px; height: 46px; flex: 0 0 46px;
+    border: 0; border-radius: 50%;
+    background: #2DA56F; color: #fff;
+    display: grid; place-items: center; cursor: pointer;
+  }
+
+  /* ===================== FINANCES VIEW ===================== */
+  #financesView { background: #ECECEC; }
+  #financesView .statusbar { color: #111; }
+
+  .fin-header {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 28px 1fr 56px;
+    align-items: center;
+    padding: 2px 16px 10px;
+    background: #ECECEC;
+    color: #1a1a1a;
+  }
+  .fin-header .close {
+    background: none; border: 0; cursor: pointer; color: #1a1a1a;
+    width: 28px; height: 28px; display: grid; place-items: center; margin-left: -4px;
+  }
+  .fin-header .ftitle { text-align: center; font-size: 16px; font-weight: 700; }
+  .fin-header .ficons { display: flex; gap: 16px; justify-content: flex-end; color: #1a1a1a; }
+  .fin-header .ficons button { background: none; border: 0; cursor: pointer; color: inherit; display: grid; place-items: center; }
+
+  .fin-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 6px 14px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .fin-body::-webkit-scrollbar { width: 0; }
+
+  .fin-explore {
+    border: 0;
+    border-radius: 14px;
+    padding: 16px 18px;
+    background: linear-gradient(100deg, #18493a, #0c2c22);
+    color: #fff;
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+  }
+  .fin-explore:active { transform: scale(.99); }
+  .fin-explore .lead { display: flex; align-items: center; gap: 9px; }
+
+  .month-sel {
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: grid;
+    grid-template-columns: 20px 1fr 20px;
+    align-items: center;
+    color: #8A968F;
+  }
+  .month-sel .nav { text-align: center; font-size: 18px; color: #b7bfbb; }
+  .month-sel .mid { text-align: center; }
+  .month-sel .m { font-size: 15px; font-weight: 700; color: #1a2b22; display: inline-flex; align-items: center; gap: 6px; }
+  .month-sel .sub { font-size: 11.5px; margin-top: 2px; }
+
+  .fin-card { background: #fff; border-radius: 16px; padding: 16px; }
+  .fin-card .cardhead {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .fin-card .ct { font-size: 15px; font-weight: 700; color: #1a2b22; }
+  .fin-card .datepill { font-size: 11px; font-weight: 700; color: #8A968F; }
+
+  .balance-label { font-size: 13.5px; color: #1a2b22; }
+  .balance-value { font-size: 26px; font-weight: 800; color: #14241D; margin-top: 4px; }
+
+  .frow { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 13.5px; }
+  .frow .lbl { color: #1a2b22; display: inline-flex; align-items: center; gap: 6px; }
+  .frow .val { font-weight: 600; color: #14241D; }
+  .frow .val.pos { color: #2DA56F; }
+  .frow .val.neg { color: #d3473f; }
+  .frow .chev { color: #c4ccc8; margin-left: 4px; }
+
+  .txn { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
+  .txn .tic { width: 34px; height: 34px; border-radius: 50%; background: #EAF4EE; display: grid; place-items: center; font-size: 15px; flex: 0 0 34px; }
+  .txn .tmain { flex: 1; min-width: 0; }
+  .txn .tname { font-size: 13.5px; font-weight: 600; color: #14241D; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .txn .tsub { font-size: 11px; color: #8A968F; margin-top: 1px; }
+  .txn .tval { font-weight: 600; font-size: 13px; white-space: nowrap; }
+  .txn .tval.neg { color: #d3473f; }
+  .txn .chev { color: #c4ccc8; }
+
+  .lrow { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
+  .lrow .lic { width: 22px; text-align: center; font-size: 15px; flex: 0 0 22px; color: #5C7A6E; }
+  .lrow .llbl { flex: 1; font-size: 13.5px; color: #1a2b22; }
+  .lrow .lval { font-weight: 600; font-size: 13px; color: #14241D; }
+  .lrow .lval.neg { color: #d3473f; }
+  .lrow .chev { color: #c4ccc8; }
+
+  .fin-btn {
+    width: 100%; margin-top: 12px;
+    border: 0; border-radius: 10px; padding: 13px;
+    font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer;
+  }
+  .fin-btn:active { transform: scale(.99); }
+  .fin-btn.gray { background: #EFF1F0; color: #3a4a43; }
+  .fin-btn.green { background: #5BD07A; color: #0d3b22; }
+
+  @media (max-width: 430px) {
+    body { padding: 0; }
+    .phone {
+      width: 100vw; height: 100vh; max-height: none;
+      border-radius: 0; padding: 0;
+      box-shadow: none;
+    }
+    .screen { border-radius: 0; }
+    .notch { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class=&quot;phone&quot;>
+    <div class=&quot;screen&quot;>
+      <div class=&quot;notch&quot;></div>
+
+      <!-- ===================== WHATSAPP VIEW ===================== -->
+      <section class=&quot;view&quot; id=&quot;whatsAppView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>9:41</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <header class=&quot;wa-header&quot;>
+          <button class=&quot;back&quot; aria-label=&quot;Voltar&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          </button>
+          <div class=&quot;wa-avatar&quot;>S</div>
+          <div class=&quot;wa-title&quot;>OPF Stone
+            <span class=&quot;check&quot;>
+              <svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;><path d=&quot;M12 2l2.4 1.8 3 .1 .9 2.9 2.4 1.8-.9 2.9.9 2.9-2.4 1.8-.9 2.9-3 .1L12 22l-2.4-1.8-3-.1-.9-2.9L3.3 15.4l.9-2.9-.9-2.9 2.4-1.8.9-2.9 3-.1z&quot;/><path d=&quot;M10.6 14.6l-2-2-1.1 1.1 3.1 3.1 5.3-5.3-1.1-1.1z&quot; fill=&quot;#1f2c34&quot;/></svg>
+            </span>
+          </div>
+        </header>
+
+        <div class=&quot;wa-body&quot;>
+          <div class=&quot;wa-daysep&quot;>HOJE</div>
+          <div class=&quot;wa-msg&quot;>
+            <span class=&quot;line&quot;><span class=&quot;wave&quot;>Oi, Felipe! 👋</span></span>
+            <div style=&quot;margin-top:6px&quot;>este mês você tem <b>R$ 00,00</b> em contas fixas mapeadas: água, luz, fornecedor e outras.</div>
+            <div style=&quot;margin-top:6px&quot;>Deixa o saldo na Stone e pague tudo em um só lugar, sem esquecer nenhuma data.</div>
+            <div style=&quot;margin-top:6px&quot;>Acesse o app para conferir os detalhes.</div>
+            <div class=&quot;wa-time&quot;>12:30</div>
+            <div class=&quot;wa-cta&quot;><button id=&quot;goFinances&quot;>Conferir contas</button></div>
+          </div>
+        </div>
+
+        <div class=&quot;wa-inputbar&quot;>
+          <div class=&quot;wa-field&quot;>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 5v14M5 12h14&quot;/></svg>
+            <span class=&quot;ph&quot;>Mensagem</span>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M9 14s1.2 1.5 3 1.5S15 14 15 14&quot; stroke-linecap=&quot;round&quot;/><circle cx=&quot;9&quot; cy=&quot;10&quot; r=&quot;1&quot; fill=&quot;currentColor&quot; stroke=&quot;none&quot;/><circle cx=&quot;15&quot; cy=&quot;10&quot; r=&quot;1&quot; fill=&quot;currentColor&quot; stroke=&quot;none&quot;/></svg>
+          </div>
+          <button class=&quot;wa-cam&quot; aria-label=&quot;Câmera&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M3 8a2 2 0 0 1 2-2h2l1.5-2h7L19 6h0a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z&quot;/><circle cx=&quot;12&quot; cy=&quot;13&quot; r=&quot;3.2&quot;/></svg>
+          </button>
+          <button class=&quot;wa-mic&quot; aria-label=&quot;Áudio&quot;>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><rect x=&quot;9&quot; y=&quot;2&quot; width=&quot;6&quot; height=&quot;12&quot; rx=&quot;3&quot;/><path d=&quot;M5 11a7 7 0 0 0 14 0&quot;/><path d=&quot;M12 18v3&quot;/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================== FINANCES VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;financesView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <header class=&quot;fin-header&quot;>
+          <button class=&quot;close&quot; aria-label=&quot;Fechar&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 6l12 12M18 6L6 18&quot;/></svg>
+          </button>
+          <div class=&quot;ftitle&quot;>Minhas Finanças</div>
+          <div class=&quot;ficons&quot;>
+            <button aria-label=&quot;Ajuda&quot;>
+              <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M9.2 9.2a2.8 2.8 0 0 1 5.4 1c0 1.8-2.6 2.2-2.6 3.8&quot;/><circle cx=&quot;12&quot; cy=&quot;17&quot; r=&quot;.6&quot; fill=&quot;currentColor&quot;/></svg>
+            </button>
+            <button aria-label=&quot;Ocultar valores&quot;>
+              <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z&quot;/><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;3&quot;/></svg>
+            </button>
+          </div>
+        </header>
+
+        <div class=&quot;fin-body&quot;>
+          <button class=&quot;fin-explore&quot; id=&quot;goChat&quot;>
+            <span class=&quot;lead&quot;>✨ Explorar minhas finanças</span>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 6l6 6-6 6&quot;/></svg>
+          </button>
+
+          <div class=&quot;month-sel&quot;>
+            <div class=&quot;nav&quot;>‹</div>
+            <div class=&quot;mid&quot;>
+              <span class=&quot;m&quot;>📅 Março 2026 ⌄</span>
+              <div class=&quot;sub&quot;>Toque pra escolher outro período</div>
+            </div>
+            <div class=&quot;nav&quot;>›</div>
+          </div>
+
+          <div class=&quot;fin-card&quot;>
+            <div class=&quot;balance-label&quot;>Saldo da conta</div>
+            <div class=&quot;balance-value&quot;>R$ 14.000,00</div>
+          </div>
+
+          <div class=&quot;fin-card&quot;>
+            <div class=&quot;cardhead&quot;>
+              <span class=&quot;ct&quot;>Fluxo de caixa</span>
+              <span class=&quot;datepill&quot;>1 mar 26 → 13 mar 26</span>
+            </div>
+            <div class=&quot;frow&quot;><span class=&quot;lbl&quot;>Entradas (valor líquido)</span><span class=&quot;val pos&quot;>R$ 19.000,00 <span class=&quot;chev&quot;>›</span></span></div>
+            <div class=&quot;frow&quot;><span class=&quot;lbl&quot;>Saídas</span><span class=&quot;val neg&quot;>- R$ 10.000,00 <span class=&quot;chev&quot;>›</span></span></div>
+            <div class=&quot;frow&quot;><span class=&quot;lbl&quot;>Balanço</span><span class=&quot;val&quot;>R$ 9.000,00</span></div>
+            <div class=&quot;frow&quot;><span class=&quot;lbl&quot;>Saldo inicial</span><span class=&quot;val&quot;>R$ 5.000,00</span></div>
+            <div class=&quot;frow&quot;><span class=&quot;lbl&quot;>Saldo atual</span><span class=&quot;val&quot;>R$ 14.000,00</span></div>
+            <button class=&quot;fin-btn gray&quot;>Conferir detalhes</button>
+          </div>
+
+          <div class=&quot;fin-card&quot;>
+            <div class=&quot;cardhead&quot;>
+              <span class=&quot;ct&quot;>Extrato</span>
+              <span class=&quot;datepill&quot;>1 mar 26 → 13 mar 26</span>
+            </div>
+            <div class=&quot;txn&quot;>
+              <span class=&quot;tic&quot;>🔁</span>
+              <div class=&quot;tmain&quot;><div class=&quot;tname&quot;>Maria Souza</div><div class=&quot;tsub&quot;>Transferência | Pix · 19 nov 2025 às 17:00</div></div>
+              <span class=&quot;tval&quot;>R$ 300,00</span><span class=&quot;chev&quot;>›</span>
+            </div>
+            <div class=&quot;txn&quot;>
+              <span class=&quot;tic&quot;>💳</span>
+              <div class=&quot;tmain&quot;><div class=&quot;tname&quot;>Supermercado AB…</div><div class=&quot;tsub&quot;>Débito | Físico · 19 nov 2025 às 17:00</div></div>
+              <span class=&quot;tval neg&quot;>- R$ 80,00</span><span class=&quot;chev&quot;>›</span>
+            </div>
+            <div class=&quot;txn&quot;>
+              <span class=&quot;tic&quot;>🟢</span>
+              <div class=&quot;tmain&quot;><div class=&quot;tname&quot;>Maria Souza</div><div class=&quot;tsub&quot;>Recebimento | Pix · 19 nov 2025 às 15:00</div></div>
+              <span class=&quot;tval&quot;>R$ 100,00</span><span class=&quot;chev&quot;>›</span>
+            </div>
+            <button class=&quot;fin-btn green&quot;>Conferir extrato completo</button>
+          </div>
+
+          <div class=&quot;fin-card&quot;>
+            <div class=&quot;cardhead&quot;>
+              <span class=&quot;ct&quot;>Entradas</span>
+              <span class=&quot;datepill&quot;>1 mar 26 → 13 mar 26</span>
+            </div>
+            <div class=&quot;lrow&quot;><span class=&quot;lic&quot;>📟</span><span class=&quot;llbl&quot;>Pix maquininha</span><span class=&quot;lval&quot;>R$ 15.000,00</span><span class=&quot;chev&quot;>›</span></div>
+            <div class=&quot;lrow&quot;><span class=&quot;lic&quot;>🔁</span><span class=&quot;llbl&quot;>Transferência Pix</span><span class=&quot;lval&quot;>R$ 5.154,22</span><span class=&quot;chev&quot;>›</span></div>
+            <div class=&quot;lrow&quot;><span class=&quot;lic&quot;>💳</span><span class=&quot;llbl&quot;>Recebimento crédito</span><span class=&quot;lval&quot;>R$ 5.154,22</span><span class=&quot;chev&quot;>›</span></div>
+            <button class=&quot;fin-btn gray&quot;>Conferir todas as entradas</button>
+          </div>
+
+          <div class=&quot;fin-card&quot;>
+            <div class=&quot;cardhead&quot;>
+              <span class=&quot;ct&quot;>Saídas</span>
+              <span class=&quot;datepill&quot;>1 mar 26 → 13 mar 26</span>
+            </div>
+            <div class=&quot;lrow&quot;><span class=&quot;lic&quot;>🏭</span><span class=&quot;llbl&quot;>Fornecedores</span><span class=&quot;lval neg&quot;>- R$ 12.154,22</span><span class=&quot;chev&quot;>›</span></div>
+            <div class=&quot;lrow&quot;><span class=&quot;lic&quot;>👥</span><span class=&quot;llbl&quot;>Funcionários</span><span class=&quot;lval neg&quot;>- R$ 5.154,22</span><span class=&quot;chev&quot;>›</span></div>
+            <div class=&quot;lrow&quot;><span class=&quot;lic&quot;>🏠</span><span class=&quot;llbl&quot;>Aluguel e condomínio</span><span class=&quot;lval neg&quot;>- R$ 5.154,22</span><span class=&quot;chev&quot;>›</span></div>
+            <button class=&quot;fin-btn gray&quot;>Conferir todas as saídas</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CHAT VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;chatView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <!-- signal -->
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <!-- wifi -->
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <!-- battery -->
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <header class=&quot;chat-header&quot;>
+          <button class=&quot;back&quot; aria-label=&quot;Voltar&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          </button>
+          <div class=&quot;title&quot;>Consultor Minhas Finanças</div>
+          <span></span>
+        </header>
+
+        <div class=&quot;chat-body&quot; id=&quot;chatBody&quot;>
+          <div class=&quot;intro&quot;>
+            <div class=&quot;hi&quot;><span>✨</span><span>Olá, Felipe!</span></div>
+            <p>O consultor usa IA e está em fase de testes.<br/>Confira as informações apresentadas.</p>
+          </div>
+          <div class=&quot;daysep&quot;>Hoje</div>
+          <!-- messages injected here -->
+        </div>
+
+        <div class=&quot;autonote&quot;>Respostas geradas automaticamente</div>
+
+        <div class=&quot;inputbar&quot;>
+          <form id=&quot;chatForm&quot; autocomplete=&quot;off&quot;>
+            <input type=&quot;text&quot; id=&quot;chatInput&quot; placeholder=&quot;Digite sua mensagem&quot; />
+            <button class=&quot;send&quot; type=&quot;submit&quot; aria-label=&quot;Enviar&quot;>
+              <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 19V5&quot;/><path d=&quot;M5 12l7-7 7 7&quot;/></svg>
+            </button>
+          </form>
+          <button class=&quot;send&quot; id=&quot;micBtn&quot; aria-label=&quot;Áudio&quot;>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><rect x=&quot;9&quot; y=&quot;2&quot; width=&quot;6&quot; height=&quot;12&quot; rx=&quot;3&quot;/><path d=&quot;M5 11a7 7 0 0 0 14 0&quot;/><path d=&quot;M12 18v3&quot;/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================== PIN VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;pinView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <div class=&quot;pin-top&quot;>
+          <button class=&quot;pin-back&quot; id=&quot;pinBack&quot; aria-label=&quot;Voltar&quot;>
+            <svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          </button>
+        </div>
+
+        <div class=&quot;pin-main&quot;>
+          <h1>Digite sua senha</h1>
+          <p class=&quot;sub&quot;>Digite a senha de 6 números.</p>
+
+          <div class=&quot;pin-boxes&quot; id=&quot;pinBoxes&quot;>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+          </div>
+
+          <button class=&quot;continuar&quot; id=&quot;continuar&quot; disabled>
+            <span class=&quot;spin&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span>
+            <span>Continuar</span>
+          </button>
+        </div>
+
+        <div class=&quot;keypad&quot; id=&quot;keypad&quot;>
+          <button class=&quot;key&quot; data-k=&quot;1&quot;>1</button>
+          <button class=&quot;key&quot; data-k=&quot;2&quot;>2</button>
+          <button class=&quot;key&quot; data-k=&quot;3&quot;>3</button>
+          <button class=&quot;key&quot; data-k=&quot;4&quot;>4</button>
+          <button class=&quot;key&quot; data-k=&quot;5&quot;>5</button>
+          <button class=&quot;key&quot; data-k=&quot;6&quot;>6</button>
+          <button class=&quot;key&quot; data-k=&quot;7&quot;>7</button>
+          <button class=&quot;key&quot; data-k=&quot;8&quot;>8</button>
+          <button class=&quot;key&quot; data-k=&quot;9&quot;>9</button>
+          <button class=&quot;key blank&quot; tabindex=&quot;-1&quot;></button>
+          <button class=&quot;key&quot; data-k=&quot;0&quot;>0</button>
+          <button class=&quot;key fn&quot; data-k=&quot;del&quot; aria-label=&quot;Apagar&quot;>
+            <svg width=&quot;26&quot; height=&quot;20&quot; viewBox=&quot;0 0 28 22&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 3h15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9L1 11z&quot;/><path d=&quot;M14 8l6 6M20 8l-6 6&quot;/></svg>
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+(function () {
+  &quot;use strict&quot;;
+
+  /* -------------------- Mocked conversation script -------------------- */
+  // Each user send advances to the next bot reply.
+  const TIME = &quot;10:46&quot;;
+
+  const botGreeting = {
+    type: &quot;bot&quot;,
+    html:
+      &quot;Olá estou aqui para te ajudar a entender melhor suas finanças. &quot; +
+      &quot;Posso te mostrar como está sua conta, seus gastos no cartão e os saldos que &quot; +
+      &quot;você trouxe de outras instituições pelo Open Finance, tudo em um só lugar. &quot; +
+      &quot;Por onde quer começar?&quot;
+  };
+
+  const billsCard = {
+    type: &quot;bot&quot;,
+    html:
+      '<span class=&quot;line&quot;>Com base nas suas transações recentes você tem ' +
+      '<b>R$ 8.400,00</b> em contas a pagar. aqui está o resumo:</span>' +
+      '<div class=&quot;group&quot;><div class=&quot;ghead&quot;>🏭 Fornecedores</div>' +
+        '<div class=&quot;gitem&quot;>Fornecedor A: R$ 3.200,00</div>' +
+        '<div class=&quot;gitem&quot;>Fornecedor B: R$ 1.800,00</div></div>' +
+      '<div class=&quot;group&quot;><div class=&quot;ghead&quot;>👤 Salários</div>' +
+        '<div class=&quot;gitem&quot;>Salário João: R$ 1.500,00</div>' +
+        '<div class=&quot;gitem&quot;>Salário Maria: R$ 900,00</div></div>' +
+      '<div class=&quot;group&quot;><div class=&quot;ghead&quot;>⛽ Combustível</div>' +
+        '<div class=&quot;gitem&quot;>Posto X: R$ 600,00</div>' +
+        '<div class=&quot;gitem&quot;>Abastecimento frota: R$ 400,00</div></div>' +
+      '<div class=&quot;total&quot;>Total da semana: R$ 8.400,00</div>' +
+      '<div class=&quot;ask&quot;>Quer pagar alguma dessas contas agora?</div>'
+  };
+
+  const pixCard = {
+    type: &quot;bot&quot;,
+    pix: true,
+    html:
+      '<span class=&quot;line&quot;><b>Confira os dados da transferência Pix:</b></span>' +
+      '<div class=&quot;group&quot;>' +
+        '<div class=&quot;datarow&quot;><span class=&quot;ic&quot;>💰</span><span><span class=&quot;k&quot;>Valor:</span> R$1.500,00</span></div>' +
+        '<div class=&quot;datarow&quot;><span class=&quot;ic&quot;>👤</span><span><span class=&quot;k&quot;>Para:</span> João Santos Neves</span></div>' +
+        '<div class=&quot;datarow&quot;><span class=&quot;ic&quot;>📄</span><span><span class=&quot;k&quot;>Documento:</span> ***345.***-**</span></div>' +
+        '<div class=&quot;datarow&quot;><span class=&quot;ic&quot;>🏦</span><span><span class=&quot;k&quot;>Instituição:</span> Banco do Brasil</span></div>' +
+        '<div class=&quot;datarow&quot;><span class=&quot;ic&quot;>🔑</span><span><span class=&quot;k&quot;>Chave:</span> (48) 99219-2929</span></div>' +
+      '</div>' +
+      '<div class=&quot;ask&quot;><b>Confirma os dados?</b></div>' +
+      '<div class=&quot;cardbtns&quot;>' +
+        '<button class=&quot;cardbtn&quot; data-act=&quot;confirm&quot;>Confirmar dados</button>' +
+        '<button class=&quot;cardbtn&quot; data-act=&quot;alter&quot;>Preciso alterar os dados</button>' +
+      '</div>'
+  };
+
+  const alterReply = {
+    type: &quot;bot&quot;,
+    html:
+      &quot;Sem problemas! Me diga o que você gostaria de alterar nos dados da &quot; +
+      &quot;transferência (valor, chave ou destinatário) que eu atualizo para você.&quot;
+  };
+
+  const successCard = {
+    type: &quot;bot&quot;,
+    html:
+      '<span class=&quot;line&quot;>✅ <b>Pix de R$1.500,00 enviado para João Santos Neves!</b></span>' +
+      '<div class=&quot;group&quot;>Em 12/02/2026, às 10:46, com a segurança do app Stone. ' +
+      'Você também pode acessar o comprovante no menu Extrato no app.</div>' +
+      '<div class=&quot;cardbtns&quot;>' +
+        '<button class=&quot;cardbtn&quot;>Ver comprovante</button>' +
+        '<button class=&quot;cardbtn icon&quot;>🔗 Compartilhar comprovante</button>' +
+      '</div>' +
+      '<div class=&quot;feedback&quot;><span>Esta resposta te ajudou?</span>' +
+        '<button aria-label=&quot;Sim&quot;>👍</button><button aria-label=&quot;Não&quot;>👎</button></div>'
+  };
+
+  const fallback = {
+    type: &quot;bot&quot;,
+    html:
+      &quot;Posso te ajudar com mais alguma coisa? Pergunte sobre saldos, gastos no &quot; +
+      &quot;cartão ou contas a pagar.&quot;
+  };
+
+  // Ordered bot replies triggered by each successive user message.
+  const replyQueue = [billsCard, pixCard];
+
+  /* -------------------- DOM refs -------------------- */
+  const chatBody = document.getElementById(&quot;chatBody&quot;);
+  const chatForm = document.getElementById(&quot;chatForm&quot;);
+  const chatInput = document.getElementById(&quot;chatInput&quot;);
+  const whatsAppView = document.getElementById(&quot;whatsAppView&quot;);
+  const financesView = document.getElementById(&quot;financesView&quot;);
+  const chatView = document.getElementById(&quot;chatView&quot;);
+  const pinView = document.getElementById(&quot;pinView&quot;);
+
+  /* -------------------- View switching -------------------- */
+  function showView(el) {
+    [whatsAppView, financesView, chatView, pinView].forEach(function (v) {
+      v.classList.add(&quot;hidden&quot;);
+    });
+    el.classList.remove(&quot;hidden&quot;);
+  }
+
+  // Forward CTAs (pass-through flow): notification → dashboard → chat
+  document.getElementById(&quot;goFinances&quot;).addEventListener(&quot;click&quot;, function () {
+    showView(financesView);
+  });
+  document.getElementById(&quot;goChat&quot;).addEventListener(&quot;click&quot;, function () {
+    showView(chatView);
+  });
+
+  let step = 0;          // index into replyQueue
+  let busy = false;      // prevent sends while bot is &quot;typing&quot;
+
+  /* -------------------- Rendering helpers -------------------- */
+  function scrollDown() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function addUser(text) {
+    const row = document.createElement(&quot;div&quot;);
+    row.className = &quot;row user&quot;;
+    row.innerHTML =
+      '<div class=&quot;bubble user&quot;>' +
+        '<div class=&quot;meta&quot;>Felipe <span class=&quot;t&quot;>' + TIME + '</span></div>' +
+        '<div class=&quot;content&quot;></div>' +
+      '</div>';
+    row.querySelector(&quot;.content&quot;).textContent = text;
+    chatBody.appendChild(row);
+    scrollDown();
+  }
+
+  function addBot(msg) {
+    const row = document.createElement(&quot;div&quot;);
+    row.className = &quot;row bot&quot;;
+    row.innerHTML =
+      '<div class=&quot;bubble bot&quot;>' +
+        '<div class=&quot;meta&quot;><span class=&quot;spark&quot;>✨</span> Consultor Minhas Finanças ' +
+        '<span class=&quot;t&quot;>' + TIME + '</span></div>' +
+        '<div class=&quot;content&quot;>' + msg.html + '</div>' +
+      '</div>';
+    chatBody.appendChild(row);
+    bindCardButtons(row);
+    scrollDown();
+  }
+
+  function showTyping() {
+    const row = document.createElement(&quot;div&quot;);
+    row.className = &quot;row bot typing-row&quot;;
+    row.innerHTML = '<div class=&quot;typing&quot;><span></span><span></span><span></span></div>';
+    chatBody.appendChild(row);
+    scrollDown();
+    return row;
+  }
+
+  function botReply(msg, delay) {
+    busy = true;
+    const t = showTyping();
+    setTimeout(function () {
+      t.remove();
+      addBot(msg);
+      busy = false;
+    }, delay || 2000);
+  }
+
+  /* -------------------- Card button actions -------------------- */
+  function bindCardButtons(scope) {
+    const buttons = scope.querySelectorAll(&quot;[data-act]&quot;);
+    buttons.forEach(function (btn) {
+      btn.addEventListener(&quot;click&quot;, function () {
+        const act = btn.getAttribute(&quot;data-act&quot;);
+        if (act === &quot;confirm&quot;) {
+          openPin();
+        } else if (act === &quot;alter&quot;) {
+          // disable the card buttons after choosing
+          btn.closest(&quot;.cardbtns&quot;).querySelectorAll(&quot;button&quot;).forEach(function (b) {
+            b.disabled = true; b.style.opacity = &quot;.55&quot;;
+          });
+          botReply(alterReply, 2000);
+        }
+      });
+    });
+  }
+
+  /* -------------------- Chat send flow -------------------- */
+  chatForm.addEventListener(&quot;submit&quot;, function (e) {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text || busy) return;
+    addUser(text);
+    chatInput.value = &quot;&quot;;
+
+    if (step < replyQueue.length) {
+      const msg = replyQueue[step];
+      step++;
+      botReply(msg, 2000);
+    } else {
+      botReply(fallback, 2000);
+    }
+  });
+
+  /* -------------------- PIN flow -------------------- */
+  const boxes = Array.prototype.slice.call(document.querySelectorAll(&quot;.pin-box&quot;));
+  const continuar = document.getElementById(&quot;continuar&quot;);
+  const keypad = document.getElementById(&quot;keypad&quot;);
+  let pin = &quot;&quot;;
+
+  function openPin() {
+    pin = &quot;&quot;;
+    renderPin();
+    showView(pinView);
+  }
+
+  function closePin() {
+    showView(chatView);
+  }
+
+  function renderPin() {
+    boxes.forEach(function (b, i) {
+      b.classList.toggle(&quot;filled&quot;, i < pin.length);
+      b.classList.toggle(&quot;active&quot;, i === pin.length &amp;&amp; pin.length < 6);
+    });
+    const full = pin.length === 6;
+    continuar.classList.toggle(&quot;enabled&quot;, full);
+    continuar.disabled = !full;
+  }
+
+  function pushDigit(d) {
+    if (pin.length >= 6) return;
+    pin += d;
+    renderPin();
+  }
+  function popDigit() {
+    pin = pin.slice(0, -1);
+    renderPin();
+  }
+
+  keypad.addEventListener(&quot;click&quot;, function (e) {
+    const key = e.target.closest(&quot;[data-k]&quot;);
+    if (!key) return;
+    const k = key.getAttribute(&quot;data-k&quot;);
+    if (k === &quot;del&quot;) popDigit();
+    else pushDigit(k);
+  });
+
+  // physical keyboard support while on the PIN screen
+  document.addEventListener(&quot;keydown&quot;, function (e) {
+    if (pinView.classList.contains(&quot;hidden&quot;)) return;
+    if (e.key >= &quot;0&quot; &amp;&amp; e.key <= &quot;9&quot;) pushDigit(e.key);
+    else if (e.key === &quot;Backspace&quot;) popDigit();
+    else if (e.key === &quot;Enter&quot; &amp;&amp; pin.length === 6) submitPin();
+  });
+
+  document.getElementById(&quot;pinBack&quot;).addEventListener(&quot;click&quot;, closePin);
+
+  continuar.addEventListener(&quot;click&quot;, submitPin);
+
+  function submitPin() {
+    if (pin.length !== 6) return;
+    continuar.classList.add(&quot;loading&quot;);
+    setTimeout(function () {
+      continuar.classList.remove(&quot;loading&quot;);
+      closePin();
+      addUser(&quot;Transferência confirmada&quot;);
+      botReply(successCard, 2000);
+    }, 1100);
+  }
+
+  /* -------------------- Boot -------------------- */
+  // Flow starts on the WhatsApp notification screen.
+  // Greeting is pre-rendered so it's ready when the chat view appears.
+  showView(whatsAppView);
+  setTimeout(function () { addBot(botGreeting); }, 450);
+  renderPin();
+})();
+</script>
+</body>
+</html>
+"></iframe>
+<iframe class="frame hidden" id="frame-boleto" title="Pagar boleto" loading="eager" srcdoc="<!DOCTYPE html>
+<html lang=&quot;pt-BR&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot; />
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; />
+<title>Pagamento de Boleto — Stone</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; />
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin />
+<link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap&quot; rel=&quot;stylesheet&quot; />
+<style>
+  :root {
+    --green-top: #1B6049;
+    --green-bottom: #0A2E22;
+    --accent: #6FC09C;
+    --accent-strong: #2DA56F;
+    --cta-green: #5BD07A;
+    --pin-active: #2DA56F;
+    --pin-border: #D7DEDB;
+    --ink: #14241D;
+    --muted: #8A968F;
+    --key-bg: #FBFBFC;
+    --key-shadow: #C9CDD2;
+    --frame-radius: 44px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: &quot;Manrope&quot;, -apple-system, system-ui, sans-serif;
+    background: radial-gradient(1200px 800px at 50% -10%, #20342c 0%, #141a18 55%, #0d100f 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Phone frame ---------- */
+  .phone {
+    position: relative;
+    width: 390px;
+    height: 844px;
+    max-height: calc(100vh - 48px);
+    aspect-ratio: 390 / 844;
+    background: #000;
+    border-radius: var(--frame-radius);
+    padding: 12px;
+    box-shadow: 0 0 0 2px #2a2a2a, 0 40px 80px -20px rgba(0,0,0,.65), 0 12px 30px -8px rgba(0,0,0,.5);
+  }
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: calc(var(--frame-radius) - 12px);
+    overflow: hidden;
+    background: #fff;
+  }
+  .notch {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 130px; height: 26px;
+    background: #000;
+    border-radius: 0 0 18px 18px;
+    z-index: 60;
+  }
+
+  /* ---------- Views ---------- */
+  .view {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transition: opacity .28s ease, transform .32s ease;
+  }
+  .view.hidden { opacity: 0; pointer-events: none; transform: translateX(8%); }
+
+  /* ---------- Status bar ---------- */
+  .statusbar {
+    height: 44px;
+    flex: 0 0 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 30;
+  }
+  .statusbar .time { letter-spacing: .3px; }
+  .statusbar .icons { display: flex; align-items: center; gap: 6px; }
+  .statusbar svg { display: block; }
+
+  /* ===================== WHATSAPP VIEW ===================== */
+  #whatsAppView { background: #0b141a; }
+  #whatsAppView .statusbar { color: #e9edef; }
+
+  .wa-header {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 28px 40px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 12px 12px;
+    background: #1f2c34;
+    color: #e9edef;
+  }
+  .wa-header .back {
+    background: none; border: 0; cursor: pointer; color: #e9edef;
+    width: 28px; height: 28px; display: grid; place-items: center;
+    border-radius: 50%; margin-left: -4px;
+  }
+  .wa-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #2DA56F, #0e5b3c);
+    display: grid; place-items: center;
+    color: #fff; font-weight: 800; font-size: 18px;
+  }
+  .wa-title { display: flex; align-items: center; gap: 5px; font-size: 16px; font-weight: 700; }
+  .wa-title .check { color: #53bdeb; display: grid; place-items: center; }
+
+  .wa-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 16px 14px;
+    background-color: #0b141a;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(255,255,255,.025) 0 2px, transparent 3px),
+      radial-gradient(circle at 78% 32%, rgba(255,255,255,.025) 0 2px, transparent 3px),
+      radial-gradient(circle at 38% 62%, rgba(255,255,255,.02) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 82%, rgba(255,255,255,.02) 0 2px, transparent 3px);
+    background-size: 220px 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wa-body::-webkit-scrollbar { width: 0; }
+
+  .wa-daysep {
+    align-self: center;
+    background: #1f2c34;
+    color: #8696a0;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+  }
+  .wa-msg {
+    align-self: flex-start;
+    max-width: 86%;
+    background: #1f2c34;
+    color: #e9edef;
+    border-radius: 10px;
+    border-top-left-radius: 3px;
+    padding: 8px 10px 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 1px 1px rgba(0,0,0,.3);
+  }
+  .wa-msg .wave { font-size: 14px; }
+  .wa-msg .wa-time { font-size: 10px; color: #8696a0; text-align: right; margin-top: 3px; }
+  .wa-cta { margin-top: 8px; border-top: 1px solid rgba(255,255,255,.12); padding-top: 6px; }
+  .wa-cta button {
+    width: 100%; background: none; border: 0; cursor: pointer;
+    color: #4fc28a; font-family: inherit; font-size: 13.5px; font-weight: 700;
+    padding: 6px 0 2px;
+  }
+  .wa-cta button:active { opacity: .7; }
+
+  .wa-inputbar {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px 22px;
+    background: #0b141a;
+  }
+  .wa-field {
+    flex: 1;
+    display: flex; align-items: center; gap: 10px;
+    background: #1f2c34; border-radius: 24px;
+    padding: 10px 14px; color: #8696a0; font-size: 13.5px;
+  }
+  .wa-field .ph { flex: 1; }
+  .wa-field svg, .wa-inputbar .wa-cam svg { display: block; }
+  .wa-cam { background: none; border: 0; color: #8696a0; display: grid; place-items: center; cursor: pointer; }
+  .wa-mic {
+    width: 46px; height: 46px; flex: 0 0 46px;
+    border: 0; border-radius: 50%; background: #2DA56F; color: #fff;
+    display: grid; place-items: center; cursor: pointer;
+  }
+
+  /* ===================== BOLETO VIEW ===================== */
+  #boletoView { background: #fff; color: var(--ink); }
+  #boletoView .statusbar { color: #111; }
+
+  .bol-top { padding: 2px 20px 0; }
+  .bol-back {
+    background: none; border: 0; cursor: pointer; color: #111;
+    width: 36px; height: 36px; margin-left: -8px;
+    display: grid; place-items: center; border-radius: 50%;
+  }
+  .bol-back:active { background: #f0f0f0; }
+
+  .bol-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 22px 16px; }
+  .bol-body::-webkit-scrollbar { width: 0; }
+
+  .bol-h1 { font-size: 21px; font-weight: 800; line-height: 1.25; letter-spacing: -.3px; }
+  .bol-h1 .co { color: var(--accent-strong); }
+  .bol-sub { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+
+  .bol-section { margin-top: 18px; }
+  .bol-label { font-size: 12px; color: var(--muted); }
+  .bol-amount { font-size: 24px; font-weight: 800; margin-top: 4px; }
+
+  .bol-divider { height: 1px; background: #EFEFEF; margin: 16px 0; }
+
+  .bol-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; font-size: 13.5px; }
+  .bol-row .k { color: var(--muted); }
+  .bol-row .v { font-weight: 600; text-align: right; }
+
+  .bol-heading { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+
+  .bol-acc-head { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 6px 0; }
+  .bol-acc-head .t { font-size: 15px; font-weight: 700; }
+  .bol-acc-head .chev { color: #9aa6a0; transition: transform .2s ease; display: grid; place-items: center; }
+  .bol-acc.collapsed .chev { transform: rotate(180deg); }
+  .bol-acc.collapsed .bol-acc-body { display: none; }
+
+  .bol-code-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .bol-code { font-size: 13.5px; font-weight: 600; margin-top: 4px; word-break: break-word; line-height: 1.55; }
+
+  .bol-foot { flex: 0 0 auto; padding: 10px 20px 26px; background: #fff; }
+  .cta-green {
+    width: 100%; border: 0; border-radius: 26px; padding: 15px;
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    background: var(--cta-green); color: #0d3b22; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .12s ease, filter .15s ease;
+  }
+  .cta-green:active { transform: scale(.99); }
+  .cta-green .spin { display: none; }
+  .cta-green.loading .spin { display: inline-grid; }
+  .cta-green.loading .spin svg { animation: rot .8s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+
+  /* ===================== PIN VIEW ===================== */
+  #pinView { background: #fff; color: var(--ink); }
+  #pinView .statusbar { color: #111; }
+
+  .pin-top { padding: 4px 22px 0; }
+  .pin-back {
+    background: none; border: 0; cursor: pointer; color: #111;
+    width: 36px; height: 36px; margin-left: -8px;
+    display: grid; place-items: center; border-radius: 50%;
+  }
+  .pin-back:active { background: #f0f0f0; }
+
+  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; }
+  .pin-main h1 { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
+  .pin-main .sub { margin-top: 8px; color: var(--muted); font-size: 14px; }
+
+  .pin-boxes { display: flex; gap: 10px; margin-top: 34px; }
+  .pin-box {
+    flex: 1;
+    aspect-ratio: 1 / 1.15;
+    max-width: 46px;
+    border: 1.5px solid var(--pin-border);
+    border-radius: 9px;
+    display: grid; place-items: center;
+    transition: border-color .18s ease, box-shadow .18s ease;
+  }
+  .pin-box.active { border-color: var(--pin-active); box-shadow: 0 0 0 3px rgba(45,165,111,.14); }
+  .pin-box.filled::after { content: &quot;&quot;; width: 11px; height: 11px; border-radius: 50%; background: var(--ink); animation: pop .18s ease; }
+  @keyframes pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+
+  .continuar {
+    margin-top: 30px; width: 100%; border: 0; border-radius: 26px; padding: 15px;
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    background: #EDEDED; color: #B5B5B5; cursor: not-allowed;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .2s ease, color .2s ease;
+  }
+  .continuar.enabled { background: var(--cta-green); color: #0d3b22; cursor: pointer; }
+  .continuar.enabled:active { transform: scale(.99); }
+  .continuar .spin { display: none; }
+  .continuar.enabled .spin { display: inline-grid; }
+  .continuar.loading .spin svg { animation: rot .8s linear infinite; }
+
+  .keypad {
+    flex: 0 0 auto; background: #D2D5DB; padding: 8px 6px 26px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px 6px;
+  }
+  .key {
+    height: 46px; border: 0; border-radius: 6px;
+    background: var(--key-bg); box-shadow: 0 1px 0 var(--key-shadow);
+    font-family: inherit; font-size: 24px; font-weight: 500; color: #0b0b0b;
+    cursor: pointer; display: grid; place-items: center; transition: background .08s ease;
+  }
+  .key:active { background: #c2c6cc; }
+  .key.fn { background: transparent; box-shadow: none; font-size: 20px; color: #0b0b0b; }
+  .key.fn:active { background: rgba(0,0,0,.06); }
+  .key.blank { background: transparent; box-shadow: none; cursor: default; }
+
+  /* ===================== SUCCESS VIEW ===================== */
+  #successView { background: #fff; color: var(--ink); }
+  #successView .statusbar { color: #111; }
+
+  .suc-top { padding: 2px 20px 0; }
+  .suc-close {
+    background: none; border: 0; cursor: pointer; color: #111;
+    width: 36px; height: 36px; margin-left: -8px;
+    display: grid; place-items: center; border-radius: 50%;
+  }
+  .suc-close:active { background: #f0f0f0; }
+
+  .suc-body { flex: 1 1 auto; overflow-y: auto; padding: 6px 22px 26px; display: flex; flex-direction: column; }
+  .suc-body::-webkit-scrollbar { width: 0; }
+
+  .suc-card { border: 1px solid #ECECEC; border-radius: 18px; padding: 22px 20px; }
+  .suc-check {
+    width: 66px; height: 66px; border-radius: 50%; margin: 4px auto 0;
+    background: #E8F5EE; display: grid; place-items: center;
+  }
+  .suc-check svg { color: var(--accent-strong); }
+  .suc-title { text-align: center; font-size: 19px; font-weight: 800; margin-top: 14px; }
+
+  .suc-valrow { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 20px; }
+  .suc-vallabel { font-size: 12px; color: var(--muted); }
+  .suc-amount { font-size: 22px; font-weight: 800; margin-top: 3px; }
+  .suc-date { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .badge { background: #EAF4EE; color: #2a6b4f; font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 20px; white-space: nowrap; }
+
+  .suc-note { font-size: 13px; line-height: 1.55; color: #3a4a43; margin-top: 16px; }
+  .suc-divider { height: 1px; background: #EFEFEF; margin: 16px 0; }
+
+  .suc-foot { margin-top: 16px; }
+  .suc-btn {
+    width: 100%; border-radius: 26px; padding: 15px;
+    font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; border: 0;
+    transition: transform .12s ease;
+  }
+  .suc-btn:active { transform: scale(.99); }
+  .suc-btn.green { background: var(--cta-green); color: #0d3b22; }
+  .suc-btn.outline { background: #fff; border: 1.5px solid #DFE5E2; color: #1a2b22; margin-top: 10px; }
+
+  @media (max-width: 430px) {
+    body { padding: 0; }
+    .phone { width: 100vw; height: 100vh; max-height: none; border-radius: 0; padding: 0; box-shadow: none; }
+    .screen { border-radius: 0; }
+    .notch { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class=&quot;phone&quot;>
+    <div class=&quot;screen&quot;>
+      <div class=&quot;notch&quot;></div>
+
+      <!-- ===================== WHATSAPP VIEW ===================== -->
+      <section class=&quot;view&quot; id=&quot;whatsAppView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>9:41</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <header class=&quot;wa-header&quot;>
+          <button class=&quot;back&quot; aria-label=&quot;Voltar&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          </button>
+          <div class=&quot;wa-avatar&quot;>S</div>
+          <div class=&quot;wa-title&quot;>OPF Stone
+            <span class=&quot;check&quot;>
+              <svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;><path d=&quot;M12 2l2.4 1.8 3 .1 .9 2.9 2.4 1.8-.9 2.9.9 2.9-2.4 1.8-.9 2.9-3 .1L12 22l-2.4-1.8-3-.1-.9-2.9L3.3 15.4l.9-2.9-.9-2.9 2.4-1.8.9-2.9 3-.1z&quot;/><path d=&quot;M10.6 14.6l-2-2-1.1 1.1 3.1 3.1 5.3-5.3-1.1-1.1z&quot; fill=&quot;#1f2c34&quot;/></svg>
+            </span>
+          </div>
+        </header>
+
+        <div class=&quot;wa-body&quot;>
+          <div class=&quot;wa-daysep&quot;>HOJE</div>
+          <div class=&quot;wa-msg&quot;>
+            <span class=&quot;line&quot;><span class=&quot;wave&quot;>Oi, Felipe! 👋</span></span>
+            <div style=&quot;margin-top:6px&quot;>Identificamos um boleto de <b>R$ 400,00</b> vencendo amanhã, 26 jan 2025.</div>
+            <div style=&quot;margin-top:6px&quot;>Você tem saldo suficiente aqui na Stone para cobrir essa conta sem precisar pagar juros.</div>
+            <div style=&quot;margin-top:6px&quot;>Acesse o app e pague com segurança.</div>
+            <div class=&quot;wa-time&quot;>12:30</div>
+            <div class=&quot;wa-cta&quot;><button id=&quot;goBoleto&quot;>Pagar agora</button></div>
+          </div>
+        </div>
+
+        <div class=&quot;wa-inputbar&quot;>
+          <div class=&quot;wa-field&quot;>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 5v14M5 12h14&quot;/></svg>
+            <span class=&quot;ph&quot;>Mensagem</span>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M9 14s1.2 1.5 3 1.5S15 14 15 14&quot; stroke-linecap=&quot;round&quot;/><circle cx=&quot;9&quot; cy=&quot;10&quot; r=&quot;1&quot; fill=&quot;currentColor&quot; stroke=&quot;none&quot;/><circle cx=&quot;15&quot; cy=&quot;10&quot; r=&quot;1&quot; fill=&quot;currentColor&quot; stroke=&quot;none&quot;/></svg>
+          </div>
+          <button class=&quot;wa-cam&quot; aria-label=&quot;Câmera&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M3 8a2 2 0 0 1 2-2h2l1.5-2h7L19 6h0a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z&quot;/><circle cx=&quot;12&quot; cy=&quot;13&quot; r=&quot;3.2&quot;/></svg>
+          </button>
+          <button class=&quot;wa-mic&quot; aria-label=&quot;Áudio&quot;>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><rect x=&quot;9&quot; y=&quot;2&quot; width=&quot;6&quot; height=&quot;12&quot; rx=&quot;3&quot;/><path d=&quot;M5 11a7 7 0 0 0 14 0&quot;/><path d=&quot;M12 18v3&quot;/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================== BOLETO VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;boletoView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <div class=&quot;bol-top&quot;>
+          <button class=&quot;bol-back&quot; id=&quot;boletoBack&quot; aria-label=&quot;Voltar&quot;>
+            <svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          </button>
+        </div>
+
+        <div class=&quot;bol-body&quot;>
+          <div class=&quot;bol-h1&quot;>Enviando pagamento para <span class=&quot;co&quot;>GUILHOR CONSTRUÇÕES E FUNDAÇÃO LTDA</span></div>
+          <div class=&quot;bol-sub&quot;>Stone Pagamentos S.A. · 12.123.123/0001-00</div>
+
+          <div class=&quot;bol-section&quot;>
+            <div class=&quot;bol-label&quot;>Valor a pagar</div>
+            <div class=&quot;bol-amount&quot;>R$ 400,00</div>
+          </div>
+
+          <div class=&quot;bol-divider&quot;></div>
+          <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>Saldo disponível</span><span class=&quot;v&quot;>R$ 2.000,00</span></div>
+
+          <div class=&quot;bol-divider&quot;></div>
+          <div class=&quot;bol-heading&quot;>Data</div>
+          <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>Quando você vai pagar?</span><span class=&quot;v&quot;>Hoje, 25 jan 2025</span></div>
+          <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>Vence em</span><span class=&quot;v&quot;>Amanhã, 26 jan 2025</span></div>
+
+          <div class=&quot;bol-divider&quot;></div>
+          <div class=&quot;bol-acc&quot; id=&quot;accReceiver&quot;>
+            <div class=&quot;bol-acc-head&quot; data-acc=&quot;accReceiver&quot;>
+              <span class=&quot;t&quot;>Quem vai receber</span>
+              <span class=&quot;chev&quot;><svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 15l6-6 6 6&quot;/></svg></span>
+            </div>
+            <div class=&quot;bol-acc-body&quot;>
+              <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>Nome</span><span class=&quot;v&quot;>Guilhor Construções e Fundação LTDA</span></div>
+              <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>CPF/CNPJ</span><span class=&quot;v&quot;>12.123.123/0001-00</span></div>
+              <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>Instituição</span><span class=&quot;v&quot;>Stone Pagamentos S.A</span></div>
+            </div>
+          </div>
+
+          <div class=&quot;bol-divider&quot;></div>
+          <div class=&quot;bol-acc&quot; id=&quot;accInfo&quot;>
+            <div class=&quot;bol-acc-head&quot; data-acc=&quot;accInfo&quot;>
+              <span class=&quot;t&quot;>Informação adicional</span>
+              <span class=&quot;chev&quot;><svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 15l6-6 6 6&quot;/></svg></span>
+            </div>
+            <div class=&quot;bol-acc-body&quot;>
+              <div class=&quot;bol-code-label&quot;>Código do boleto</div>
+              <div class=&quot;bol-code&quot;>34191.7900101043.510047 91020.150008 1 99 620026000 9876534</div>
+            </div>
+          </div>
+        </div>
+
+        <div class=&quot;bol-foot&quot;>
+          <button class=&quot;cta-green&quot; id=&quot;confirmPay&quot;>
+            <span class=&quot;spin&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span>
+            <span>Confirmar pagamento</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================== PIN VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;pinView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <div class=&quot;pin-top&quot;>
+          <button class=&quot;pin-back&quot; id=&quot;pinBack&quot; aria-label=&quot;Voltar&quot;>
+            <svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          </button>
+        </div>
+
+        <div class=&quot;pin-main&quot;>
+          <h1>Digite sua senha</h1>
+
+          <div class=&quot;pin-boxes&quot; id=&quot;pinBoxes&quot;>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+            <div class=&quot;pin-box&quot;></div>
+          </div>
+
+          <button class=&quot;continuar&quot; id=&quot;continuar&quot; disabled>
+            <span class=&quot;spin&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span>
+            <span>Continuar</span>
+          </button>
+        </div>
+
+        <div class=&quot;keypad&quot; id=&quot;keypad&quot;>
+          <button class=&quot;key&quot; data-k=&quot;1&quot;>1</button>
+          <button class=&quot;key&quot; data-k=&quot;2&quot;>2</button>
+          <button class=&quot;key&quot; data-k=&quot;3&quot;>3</button>
+          <button class=&quot;key&quot; data-k=&quot;4&quot;>4</button>
+          <button class=&quot;key&quot; data-k=&quot;5&quot;>5</button>
+          <button class=&quot;key&quot; data-k=&quot;6&quot;>6</button>
+          <button class=&quot;key&quot; data-k=&quot;7&quot;>7</button>
+          <button class=&quot;key&quot; data-k=&quot;8&quot;>8</button>
+          <button class=&quot;key&quot; data-k=&quot;9&quot;>9</button>
+          <button class=&quot;key blank&quot; tabindex=&quot;-1&quot;></button>
+          <button class=&quot;key&quot; data-k=&quot;0&quot;>0</button>
+          <button class=&quot;key fn&quot; data-k=&quot;del&quot; aria-label=&quot;Apagar&quot;>
+            <svg width=&quot;26&quot; height=&quot;20&quot; viewBox=&quot;0 0 28 22&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 3h15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9L1 11z&quot;/><path d=&quot;M14 8l6 6M20 8l-6 6&quot;/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================== SUCCESS VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;successView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:31</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+
+        <div class=&quot;suc-top&quot;>
+          <button class=&quot;suc-close&quot; id=&quot;successClose&quot; aria-label=&quot;Fechar&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 6l12 12M18 6L6 18&quot;/></svg>
+          </button>
+        </div>
+
+        <div class=&quot;suc-body&quot;>
+          <div class=&quot;suc-card&quot;>
+            <div class=&quot;suc-check&quot;>
+              <svg width=&quot;34&quot; height=&quot;34&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/><path d=&quot;M8 12.5l2.5 2.5L16 9.5&quot;/></svg>
+            </div>
+            <div class=&quot;suc-title&quot;>Pagamento enviado</div>
+
+            <div class=&quot;suc-valrow&quot;>
+              <div>
+                <div class=&quot;suc-vallabel&quot;>Valor</div>
+                <div class=&quot;suc-amount&quot;>R$ 400,00</div>
+                <div class=&quot;suc-date&quot;>1 abr 2024 às 12:31</div>
+              </div>
+              <span class=&quot;badge&quot;>Saldo em Conta</span>
+            </div>
+
+            <div class=&quot;suc-note&quot;>O pagamento foi enviado e vai ser confirmado <b>em até 1 dia útil</b>. Vamos te avisar por e-mail.</div>
+
+            <div class=&quot;suc-divider&quot;></div>
+            <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>Nome</span><span class=&quot;v&quot;>Guilhor Construções e Fundação LTDA</span></div>
+            <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>CPF/CNPJ</span><span class=&quot;v&quot;>(11) 90001-0000</span></div>
+            <div class=&quot;bol-row&quot;><span class=&quot;k&quot;>Instituição</span><span class=&quot;v&quot;>Nu Pagamentos S.A.</span></div>
+          </div>
+
+          <div class=&quot;suc-foot&quot;>
+            <button class=&quot;suc-btn green&quot;>Compartilhar comprovante</button>
+            <button class=&quot;suc-btn outline&quot; id=&quot;payAgain&quot;>Fazer outro pagamento</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+(function () {
+  &quot;use strict&quot;;
+
+  /* -------------------- DOM refs -------------------- */
+  const whatsAppView = document.getElementById(&quot;whatsAppView&quot;);
+  const boletoView = document.getElementById(&quot;boletoView&quot;);
+  const pinView = document.getElementById(&quot;pinView&quot;);
+  const successView = document.getElementById(&quot;successView&quot;);
+
+  /* -------------------- View switching -------------------- */
+  function showView(el) {
+    [whatsAppView, boletoView, pinView, successView].forEach(function (v) {
+      v.classList.add(&quot;hidden&quot;);
+    });
+    el.classList.remove(&quot;hidden&quot;);
+  }
+
+  // Forward CTAs (pass-through flow): notification → boleto → pin → success
+  document.getElementById(&quot;goBoleto&quot;).addEventListener(&quot;click&quot;, function () {
+    showView(boletoView);
+  });
+  document.getElementById(&quot;boletoBack&quot;).addEventListener(&quot;click&quot;, function () {
+    showView(whatsAppView);
+  });
+  document.getElementById(&quot;successClose&quot;).addEventListener(&quot;click&quot;, function () {
+    resetAll();
+    showView(whatsAppView);
+  });
+  document.getElementById(&quot;payAgain&quot;).addEventListener(&quot;click&quot;, function () {
+    resetAll();
+    showView(whatsAppView);
+  });
+
+  /* -------------------- Boleto accordions -------------------- */
+  document.querySelectorAll(&quot;.bol-acc-head&quot;).forEach(function (head) {
+    head.addEventListener(&quot;click&quot;, function () {
+      head.closest(&quot;.bol-acc&quot;).classList.toggle(&quot;collapsed&quot;);
+    });
+  });
+
+  /* -------------------- Confirm payment → PIN -------------------- */
+  const confirmPay = document.getElementById(&quot;confirmPay&quot;);
+  confirmPay.addEventListener(&quot;click&quot;, function () {
+    confirmPay.classList.add(&quot;loading&quot;);
+    setTimeout(function () {
+      confirmPay.classList.remove(&quot;loading&quot;);
+      openPin();
+    }, 900);
+  });
+
+  /* -------------------- PIN flow -------------------- */
+  const boxes = Array.prototype.slice.call(document.querySelectorAll(&quot;.pin-box&quot;));
+  const continuar = document.getElementById(&quot;continuar&quot;);
+  const keypad = document.getElementById(&quot;keypad&quot;);
+  let pin = &quot;&quot;;
+
+  function openPin() {
+    pin = &quot;&quot;;
+    renderPin();
+    showView(pinView);
+  }
+
+  function renderPin() {
+    boxes.forEach(function (b, i) {
+      b.classList.toggle(&quot;filled&quot;, i < pin.length);
+      b.classList.toggle(&quot;active&quot;, i === pin.length &amp;&amp; pin.length < 6);
+    });
+    const full = pin.length === 6;
+    continuar.classList.toggle(&quot;enabled&quot;, full);
+    continuar.disabled = !full;
+  }
+
+  function pushDigit(d) {
+    if (pin.length >= 6) return;
+    pin += d;
+    renderPin();
+  }
+  function popDigit() {
+    pin = pin.slice(0, -1);
+    renderPin();
+  }
+
+  keypad.addEventListener(&quot;click&quot;, function (e) {
+    const key = e.target.closest(&quot;[data-k]&quot;);
+    if (!key) return;
+    const k = key.getAttribute(&quot;data-k&quot;);
+    if (k === &quot;del&quot;) popDigit();
+    else pushDigit(k);
+  });
+
+  // physical keyboard support while on the PIN screen
+  document.addEventListener(&quot;keydown&quot;, function (e) {
+    if (pinView.classList.contains(&quot;hidden&quot;)) return;
+    if (e.key >= &quot;0&quot; &amp;&amp; e.key <= &quot;9&quot;) pushDigit(e.key);
+    else if (e.key === &quot;Backspace&quot;) popDigit();
+    else if (e.key === &quot;Enter&quot; &amp;&amp; pin.length === 6) submitPin();
+  });
+
+  document.getElementById(&quot;pinBack&quot;).addEventListener(&quot;click&quot;, function () {
+    showView(boletoView);
+  });
+
+  continuar.addEventListener(&quot;click&quot;, submitPin);
+
+  function submitPin() {
+    if (pin.length !== 6) return;
+    continuar.classList.add(&quot;loading&quot;);
+    setTimeout(function () {
+      continuar.classList.remove(&quot;loading&quot;);
+      showView(successView);
+    }, 1100);
+  }
+
+  /* -------------------- Reset -------------------- */
+  function resetAll() {
+    pin = &quot;&quot;;
+    renderPin();
+    // re-expand accordions to their default (open) state
+    document.querySelectorAll(&quot;.bol-acc&quot;).forEach(function (a) {
+      a.classList.remove(&quot;collapsed&quot;);
+    });
+  }
+
+  /* -------------------- Boot -------------------- */
+  // Flow starts on the WhatsApp notification screen.
+  showView(whatsAppView);
+  renderPin();
+})();
+</script>
+</body>
+</html>
+"></iframe>
+<iframe class="frame hidden" id="frame-trazer" title="Trazer saldo" loading="eager" srcdoc="<!DOCTYPE html>
+<html lang=&quot;pt-BR&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot; />
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; />
+<title>Trazer Saldo — Open Finance — Stone</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot; />
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin />
+<link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap&quot; rel=&quot;stylesheet&quot; />
+<style>
+  :root {
+    --accent-strong: #2DA56F;
+    --cta-green: #2DA56F;
+    --nu-purple: #820ad1;
+    --ink: #14241D;
+    --muted: #8A968F;
+    --key-bg: #FBFBFC;
+    --key-shadow: #C9CDD2;
+    --frame-radius: 44px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: &quot;Manrope&quot;, -apple-system, system-ui, sans-serif;
+    background: radial-gradient(1200px 800px at 50% -10%, #20342c 0%, #141a18 55%, #0d100f 100%);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 16px; color: var(--ink); -webkit-font-smoothing: antialiased;
+  }
+
+  .phone {
+    position: relative; width: 390px; height: 844px;
+    max-height: calc(100vh - 48px); aspect-ratio: 390 / 844;
+    background: #000; border-radius: var(--frame-radius); padding: 12px;
+    box-shadow: 0 0 0 2px #2a2a2a, 0 40px 80px -20px rgba(0,0,0,.65), 0 12px 30px -8px rgba(0,0,0,.5);
+  }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: calc(var(--frame-radius) - 12px); overflow: hidden; background: #fff; }
+  .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 130px; height: 26px; background: #000; border-radius: 0 0 18px 18px; z-index: 60; }
+
+  .view { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 1; transition: opacity .28s ease, transform .32s ease; }
+  .view.hidden { opacity: 0; pointer-events: none; transform: translateX(8%); }
+
+  .statusbar { height: 44px; flex: 0 0 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; font-size: 14px; font-weight: 700; z-index: 30; }
+  .statusbar .time { letter-spacing: .3px; }
+  .statusbar .icons { display: flex; align-items: center; gap: 6px; }
+  .statusbar svg { display: block; }
+
+  /* shared light-screen header */
+  .lhead { padding: 2px 20px 0; flex: 0 0 auto; }
+  .lhead .nav-btn { background: none; border: 0; cursor: pointer; color: #111; width: 36px; height: 36px; margin-left: -8px; display: grid; place-items: center; border-radius: 50%; }
+  .lhead .nav-btn:active { background: #f0f0f0; }
+
+  /* shared rows / dividers / headings */
+  .row-kv { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; font-size: 13.5px; }
+  .row-kv .k { color: var(--muted); }
+  .row-kv .v { font-weight: 600; text-align: right; }
+  .row-kv .v.chev { display: inline-flex; align-items: center; gap: 6px; }
+  .row-kv .v .ch { color: #c4ccc8; }
+  .divider { height: 1px; background: #EFEFEF; margin: 14px 0; }
+  .heading { font-size: 15px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; justify-content: space-between; }
+  .heading .link { color: var(--accent-strong); font-size: 13px; font-weight: 700; cursor: pointer; }
+
+  .cta-green {
+    width: 100%; border: 0; border-radius: 26px; padding: 15px;
+    font-family: inherit; font-size: 15px; font-weight: 700;
+    background: var(--cta-green); color: #fff; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform .12s ease, filter .15s ease;
+  }
+  .cta-green:active { transform: scale(.99); }
+  .cta-green .spin { display: none; }
+  .cta-green.loading .spin { display: inline-grid; }
+  .cta-green.loading .spin svg { animation: rot .8s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+
+  /* ===================== WHATSAPP VIEW ===================== */
+  #whatsAppView { background: #0b141a; }
+  #whatsAppView .statusbar { color: #e9edef; }
+  .wa-header { flex: 0 0 auto; display: grid; grid-template-columns: 28px 40px 1fr; align-items: center; gap: 10px; padding: 2px 12px 12px; background: #1f2c34; color: #e9edef; }
+  .wa-header .back { background: none; border: 0; cursor: pointer; color: #e9edef; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; margin-left: -4px; }
+  .wa-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #2DA56F, #0e5b3c); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 18px; }
+  .wa-title { display: flex; align-items: center; gap: 5px; font-size: 16px; font-weight: 700; }
+  .wa-title .check { color: #53bdeb; display: grid; place-items: center; }
+  .wa-body {
+    flex: 1 1 auto; overflow-y: auto; padding: 16px 14px; background-color: #0b141a;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(255,255,255,.025) 0 2px, transparent 3px),
+      radial-gradient(circle at 78% 32%, rgba(255,255,255,.025) 0 2px, transparent 3px),
+      radial-gradient(circle at 38% 62%, rgba(255,255,255,.02) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 82%, rgba(255,255,255,.02) 0 2px, transparent 3px);
+    background-size: 220px 220px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .wa-body::-webkit-scrollbar { width: 0; }
+  .wa-daysep { align-self: center; background: #1f2c34; color: #8696a0; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 8px; margin-bottom: 6px; }
+  .wa-msg { align-self: flex-start; max-width: 86%; background: #1f2c34; color: #e9edef; border-radius: 10px; border-top-left-radius: 3px; padding: 8px 10px 6px; font-size: 13px; line-height: 1.5; box-shadow: 0 1px 1px rgba(0,0,0,.3); }
+  .wa-msg .wave { font-size: 14px; }
+  .wa-msg .wa-time { font-size: 10px; color: #8696a0; text-align: right; margin-top: 3px; }
+  .wa-cta { margin-top: 8px; border-top: 1px solid rgba(255,255,255,.12); padding-top: 6px; }
+  .wa-cta button { width: 100%; background: none; border: 0; cursor: pointer; color: #4fc28a; font-family: inherit; font-size: 13.5px; font-weight: 700; padding: 6px 0 2px; }
+  .wa-cta button:active { opacity: .7; }
+  .wa-inputbar { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 8px 10px 22px; background: #0b141a; }
+  .wa-field { flex: 1; display: flex; align-items: center; gap: 10px; background: #1f2c34; border-radius: 24px; padding: 10px 14px; color: #8696a0; font-size: 13.5px; }
+  .wa-field .ph { flex: 1; }
+  .wa-field svg, .wa-inputbar .wa-cam svg { display: block; }
+  .wa-cam { background: none; border: 0; color: #8696a0; display: grid; place-items: center; cursor: pointer; }
+  .wa-mic { width: 46px; height: 46px; flex: 0 0 46px; border: 0; border-radius: 50%; background: #2DA56F; color: #fff; display: grid; place-items: center; cursor: pointer; }
+
+  /* ===================== AMOUNT VIEW ===================== */
+  #amountView { background: #fff; } #amountView .statusbar { color: #111; }
+  .amt-main { flex: 1 1 auto; padding: 14px 24px 0; }
+  .amt-main h1 { font-size: 24px; font-weight: 800; letter-spacing: -.4px; line-height: 1.2; }
+  .amt-field { margin-top: 28px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--accent-strong); padding: 8px 2px; }
+  .amt-field .cur { font-size: 18px; font-weight: 700; color: #1a2b22; }
+  .amt-field .val { font-size: 30px; font-weight: 800; color: var(--ink); }
+  .amt-field .val.empty { color: #C7CFCB; }
+  .amt-continue { margin-top: 26px; width: 100%; border: 0; border-radius: 26px; padding: 15px; font-family: inherit; font-size: 15px; font-weight: 700; background: #EDEDED; color: #B5B5B5; cursor: not-allowed; transition: background .2s ease, color .2s ease; }
+  .amt-continue.enabled { background: var(--cta-green); color: #fff; cursor: pointer; }
+  .amt-continue.enabled:active { transform: scale(.99); }
+
+  .keypad { flex: 0 0 auto; background: #D2D5DB; padding: 8px 6px 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px 6px; }
+  .key { height: 46px; border: 0; border-radius: 6px; background: var(--key-bg); box-shadow: 0 1px 0 var(--key-shadow); font-family: inherit; font-size: 24px; font-weight: 500; color: #0b0b0b; cursor: pointer; display: grid; place-items: center; transition: background .08s ease; }
+  .key:active { background: #c2c6cc; }
+  .key.fn { background: transparent; box-shadow: none; font-size: 20px; color: #0b0b0b; }
+  .key.fn:active { background: rgba(0,0,0,.06); }
+  .key.blank { background: transparent; box-shadow: none; cursor: default; }
+
+  /* ===================== INSTITUTION VIEW ===================== */
+  #institutionView { background: #fff; } #institutionView .statusbar { color: #111; }
+  .inst-main { flex: 1 1 auto; overflow-y: auto; padding: 8px 22px 22px; }
+  .inst-main::-webkit-scrollbar { width: 0; }
+  .inst-main h1 { font-size: 22px; font-weight: 800; line-height: 1.22; letter-spacing: -.3px; }
+  .inst-sub { margin-top: 8px; font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+  .inst-search { margin-top: 16px; display: flex; align-items: center; gap: 10px; background: #F2F4F3; border-radius: 12px; padding: 11px 14px; color: var(--muted); font-size: 13.5px; }
+  .inst-list { margin-top: 8px; }
+  .inst-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; cursor: pointer; }
+  .inst-row:active { opacity: .6; }
+  .inst-logo { width: 38px; height: 38px; border-radius: 50%; flex: 0 0 38px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px; }
+  .inst-main-txt { flex: 1; min-width: 0; }
+  .inst-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .inst-meta { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .inst-row .ch { color: #c4ccc8; }
+
+  /* ===================== DEPOSIT CONFIRM VIEW ===================== */
+  #depositView { background: #fff; } #depositView .statusbar { color: #111; }
+  .dep-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 22px 16px; }
+  .dep-body::-webkit-scrollbar { width: 0; }
+  .dep-h1 { font-size: 21px; font-weight: 800; letter-spacing: -.3px; }
+  .dep-sub { margin-top: 6px; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .dep-label { font-size: 12px; color: var(--muted); margin-top: 16px; }
+  .dep-amount { font-size: 24px; font-weight: 800; margin-top: 4px; }
+  .dep-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-top: 14px; }
+  .dep-warn { margin-top: 12px; background: #F2F4F3; border-radius: 12px; padding: 12px 14px; font-size: 12.5px; color: #3a4a43; line-height: 1.5; }
+  .dep-foot { flex: 0 0 auto; padding: 10px 20px 26px; background: #fff; }
+
+  /* ===================== REDIRECT (part 1) VIEW ===================== */
+  #redirectView { background: #fff; } #redirectView .statusbar { color: #111; }
+  .red-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 32px; text-align: center; }
+  .red-anim { display: flex; align-items: center; gap: 14px; color: var(--accent-strong); }
+  .red-anim .dot { display: flex; gap: 4px; }
+  .red-anim .dot span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-strong); animation: flow 1.1s infinite ease-in-out; }
+  .red-anim .dot span:nth-child(2) { animation-delay: .15s; }
+  .red-anim .dot span:nth-child(3) { animation-delay: .3s; }
+  @keyframes flow { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
+  .red-title { font-size: 19px; font-weight: 800; margin-top: 28px; }
+  .red-sub { font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 10px; max-width: 240px; }
+
+  .of-mark { position: absolute; bottom: 40px; left: 0; right: 0; text-align: center; font-size: 14px; font-weight: 700; color: #1a2b22; }
+  .of-mark b { color: #2DA56F; }
+
+  /* ===================== FACE ID VIEW ===================== */
+  #faceIdView { background: #0a0a0a; cursor: pointer; } #faceIdView .statusbar { color: #f2f2f2; }
+  .face-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; color: #f2f2f2; }
+  .face-glyph { width: 92px; height: 92px; border-radius: 22px; border: 2px solid #2DA56F; display: grid; place-items: center; box-shadow: 0 0 0 6px rgba(45,165,111,.12); animation: facepulse 1.6s ease-in-out infinite; }
+  @keyframes facepulse { 0%,100% { box-shadow: 0 0 0 6px rgba(45,165,111,.10); } 50% { box-shadow: 0 0 0 12px rgba(45,165,111,.04); } }
+  .face-label { font-size: 16px; font-weight: 700; }
+  .face-hint { font-size: 12.5px; color: #9aa39e; margin-top: -10px; }
+
+  /* ===================== AUTHORIZE VIEW (Nubank-style) ===================== */
+  #authorizeView { background: #fff; } #authorizeView .statusbar { color: #111; }
+  .nu-progress { height: 3px; background: #EEE9F6; margin: 0 0 2px; }
+  .nu-progress span { display: block; height: 3px; width: 45%; background: var(--nu-purple); border-radius: 3px; }
+  .nu-top { padding: 6px 20px 0; }
+  .nu-close { background: none; border: 0; cursor: pointer; color: #111; width: 34px; height: 34px; margin-left: -6px; display: grid; place-items: center; border-radius: 50%; }
+  .nu-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 22px 16px; }
+  .nu-body::-webkit-scrollbar { width: 0; }
+  .nu-h1 { font-size: 22px; font-weight: 800; }
+  .nu-amount { font-size: 30px; font-weight: 800; margin-top: 4px; color: var(--ink); }
+  .nu-foot { flex: 0 0 auto; padding: 8px 20px 26px; }
+  .nu-authorize { width: 100%; border: 0; border-radius: 26px; padding: 15px; font-family: inherit; font-size: 15px; font-weight: 700; background: var(--nu-purple); color: #fff; cursor: pointer; transition: transform .12s ease, filter .15s ease; }
+  .nu-authorize:active { transform: scale(.99); }
+  .nu-authorize.loading { filter: saturate(.8) opacity(.85); }
+  .nu-cancel { width: 100%; border: 0; background: none; margin-top: 6px; padding: 14px; font-family: inherit; font-size: 15px; font-weight: 700; color: var(--nu-purple); cursor: pointer; }
+
+  /* ===================== REDIRECTING VIEW (part 2) ===================== */
+  #redirectingView { background: #fff; } #redirectingView .statusbar { color: #111; }
+  .rdg-body { flex: 1 1 auto; padding: 20px 28px 0; }
+  .rdg-h1 { font-size: 22px; font-weight: 800; }
+  .rdg-sub { font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 8px; }
+  .rdg-steps { margin-top: 34px; display: flex; flex-direction: column; gap: 20px; }
+  .rdg-step { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; }
+  .rdg-step .bullet { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex: 0 0 30px; }
+  .rdg-step.done .bullet { background: var(--nu-purple); color: #fff; }
+  .rdg-step.pending .bullet { border: 2px solid #E2DAF0; }
+  .rdg-step.pending { color: var(--muted); }
+  .rdg-step .spin svg { animation: rot .9s linear infinite; color: var(--nu-purple); }
+
+  /* ===================== BROWSER VIEW ===================== */
+  #browserView { background: #cfd2d6; } #browserView .statusbar { color: #111; }
+  .br-bar { flex: 0 0 auto; padding: 4px 14px 10px; }
+  .br-url { display: flex; align-items: center; justify-content: center; gap: 8px; background: #e7e9ec; border-radius: 12px; padding: 9px 14px; font-size: 13px; color: #3a3f45; }
+  .br-page { flex: 1 1 auto; position: relative; background: #c7cace; }
+  .br-toolbar { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-around; padding: 12px 22px 24px; color: #4f555c; background: #dfe2e6; }
+  .br-dialog { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 270px; background: #f3f3f4; border-radius: 14px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.35); text-align: center; }
+  .br-dialog .dh { padding: 18px 18px 16px; font-size: 14px; font-weight: 700; color: #111; }
+  .br-dialog .db { display: flex; border-top: 1px solid #d2d2d4; }
+  .br-dialog .db button { flex: 1; background: none; border: 0; padding: 12px; font-family: inherit; font-size: 15px; color: #1c6ef2; cursor: pointer; }
+  .br-dialog .db button.bold { font-weight: 700; }
+  .br-dialog .db button + button { border-left: 1px solid #d2d2d4; }
+
+  /* ===================== FINALIZING VIEW ===================== */
+  #finalizingView { background: #eef0f1; } #finalizingView .statusbar { color: #111; }
+  .fin-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; color: #5b6660; }
+  .fin-spin svg { animation: rot .9s linear infinite; color: var(--accent-strong); }
+  .fin-text { font-size: 14px; font-weight: 600; }
+
+  /* ===================== DEPOSIT DONE VIEW ===================== */
+  #depositDoneView { background: #fff; } #depositDoneView .statusbar { color: #111; }
+  .dd-body { flex: 1 1 auto; overflow-y: auto; padding: 6px 22px 16px; }
+  .dd-body::-webkit-scrollbar { width: 0; }
+  .dd-check { width: 60px; height: 60px; border-radius: 50%; margin: 8px auto 0; background: #E8F5EE; display: grid; place-items: center; }
+  .dd-check svg { color: var(--accent-strong); }
+  .dd-title { text-align: center; font-size: 19px; font-weight: 800; margin-top: 14px; }
+  .dd-label { font-size: 12px; color: var(--muted); margin-top: 18px; }
+  .dd-amount { font-size: 24px; font-weight: 800; margin-top: 4px; }
+  .dd-foot { flex: 0 0 auto; padding: 10px 20px 26px; }
+
+  /* ===================== BOLETO VIEW ===================== */
+  #boletoView { background: #fff; } #boletoView .statusbar { color: #111; }
+  .bol-body { flex: 1 1 auto; overflow-y: auto; padding: 8px 22px 16px; }
+  .bol-body::-webkit-scrollbar { width: 0; }
+  .bol-h1 { font-size: 21px; font-weight: 800; line-height: 1.25; letter-spacing: -.3px; }
+  .bol-h1 .co { color: var(--accent-strong); }
+  .bol-sub { margin-top: 8px; font-size: 12.5px; color: var(--muted); }
+  .bol-section { margin-top: 18px; }
+  .bol-label { font-size: 12px; color: var(--muted); }
+  .bol-amount { font-size: 24px; font-weight: 800; margin-top: 4px; }
+  .bol-acc-head { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 6px 0; }
+  .bol-acc-head .t { font-size: 15px; font-weight: 700; }
+  .bol-acc-head .chev { color: #9aa6a0; transition: transform .2s ease; display: grid; place-items: center; }
+  .bol-acc.collapsed .chev { transform: rotate(180deg); }
+  .bol-acc.collapsed .bol-acc-body { display: none; }
+  .bol-code-label { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .bol-code { font-size: 13.5px; font-weight: 600; margin-top: 4px; word-break: break-word; line-height: 1.55; }
+  .bol-foot { flex: 0 0 auto; padding: 10px 20px 26px; }
+
+  /* ===================== PIN VIEW ===================== */
+  #pinView { background: #fff; } #pinView .statusbar { color: #111; }
+  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; }
+  .pin-main h1 { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
+  .pin-boxes { display: flex; gap: 10px; margin-top: 30px; }
+  .pin-box { flex: 1; aspect-ratio: 1 / 1.15; max-width: 46px; border: 1.5px solid #D7DEDB; border-radius: 9px; display: grid; place-items: center; transition: border-color .18s ease, box-shadow .18s ease; }
+  .pin-box.active { border-color: var(--accent-strong); box-shadow: 0 0 0 3px rgba(45,165,111,.14); }
+  .pin-box.filled::after { content: &quot;&quot;; width: 11px; height: 11px; border-radius: 50%; background: var(--ink); animation: popdot .18s ease; }
+  @keyframes popdot { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+  .continuar { margin-top: 28px; width: 100%; border: 0; border-radius: 26px; padding: 15px; font-family: inherit; font-size: 15px; font-weight: 700; background: #EDEDED; color: #B5B5B5; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s ease, color .2s ease; }
+  .continuar.enabled { background: var(--cta-green); color: #fff; cursor: pointer; }
+  .continuar.enabled:active { transform: scale(.99); }
+  .continuar .spin { display: none; }
+  .continuar.enabled .spin { display: inline-grid; }
+  .continuar.loading .spin svg { animation: rot .8s linear infinite; }
+
+  /* ===================== SUCCESS VIEW ===================== */
+  #successView { background: #fff; } #successView .statusbar { color: #111; }
+  .suc-body { flex: 1 1 auto; overflow-y: auto; padding: 6px 22px 26px; display: flex; flex-direction: column; }
+  .suc-body::-webkit-scrollbar { width: 0; }
+  .suc-card { border: 1px solid #ECECEC; border-radius: 18px; padding: 22px 20px; }
+  .suc-check { width: 66px; height: 66px; border-radius: 50%; margin: 4px auto 0; background: #E8F5EE; display: grid; place-items: center; }
+  .suc-check svg { color: var(--accent-strong); }
+  .suc-title { text-align: center; font-size: 19px; font-weight: 800; margin-top: 14px; }
+  .suc-valrow { display: flex; align-items: flex-start; justify-content: space-between; margin-top: 20px; }
+  .suc-vallabel { font-size: 12px; color: var(--muted); }
+  .suc-amount { font-size: 22px; font-weight: 800; margin-top: 3px; }
+  .suc-date { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .badge { background: #EAF4EE; color: #2a6b4f; font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 20px; white-space: nowrap; }
+  .suc-note { font-size: 13px; line-height: 1.55; color: #3a4a43; margin-top: 16px; }
+  .suc-foot { margin-top: 16px; }
+  .suc-btn { width: 100%; border-radius: 26px; padding: 15px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; border: 0; transition: transform .12s ease; }
+  .suc-btn:active { transform: scale(.99); }
+  .suc-btn.green { background: var(--cta-green); color: #fff; }
+  .suc-btn.outline { background: #fff; border: 1.5px solid #DFE5E2; color: #1a2b22; margin-top: 10px; }
+
+  @media (max-width: 430px) {
+    body { padding: 0; }
+    .phone { width: 100vw; height: 100vh; max-height: none; border-radius: 0; padding: 0; box-shadow: none; }
+    .screen { border-radius: 0; }
+    .notch { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class=&quot;phone&quot;>
+    <div class=&quot;screen&quot;>
+      <div class=&quot;notch&quot;></div>
+
+      <!-- ===================== WHATSAPP VIEW ===================== -->
+      <section class=&quot;view&quot; id=&quot;whatsAppView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>9:41</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <header class=&quot;wa-header&quot;>
+          <button class=&quot;back&quot; aria-label=&quot;Voltar&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          </button>
+          <div class=&quot;wa-avatar&quot;>S</div>
+          <div class=&quot;wa-title&quot;>OPF Stone
+            <span class=&quot;check&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;><path d=&quot;M12 2l2.4 1.8 3 .1 .9 2.9 2.4 1.8-.9 2.9.9 2.9-2.4 1.8-.9 2.9-3 .1L12 22l-2.4-1.8-3-.1-.9-2.9L3.3 15.4l.9-2.9-.9-2.9 2.4-1.8.9-2.9 3-.1z&quot;/><path d=&quot;M10.6 14.6l-2-2-1.1 1.1 3.1 3.1 5.3-5.3-1.1-1.1z&quot; fill=&quot;#1f2c34&quot;/></svg></span>
+          </div>
+        </header>
+        <div class=&quot;wa-body&quot;>
+          <div class=&quot;wa-daysep&quot;>HOJE</div>
+          <div class=&quot;wa-msg&quot;>
+            <span class=&quot;line&quot;><span class=&quot;wave&quot;>Oi, Felipe! 👋</span></span>
+            <div style=&quot;margin-top:6px&quot;>Identificamos um boleto de <b>R$ 12.000,00</b> vencendo na data de 00/00/0000, mas o seu saldo na Stone é de <b>R$ 3.000,00</b>.</div>
+            <div style=&quot;margin-top:6px&quot;>A boa notícia: você tem saldo suficiente distribuído em outras instituições. Dá para trazer esse valor para cá e pagar o boleto sem juros.</div>
+            <div style=&quot;margin-top:6px&quot;>Acesse o app para fazer isso agora.</div>
+            <div class=&quot;wa-time&quot;>12:30</div>
+            <div class=&quot;wa-cta&quot;><button id=&quot;goAmount&quot;>Trazer saldo</button></div>
+          </div>
+        </div>
+        <div class=&quot;wa-inputbar&quot;>
+          <div class=&quot;wa-field&quot;>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 5v14M5 12h14&quot;/></svg>
+            <span class=&quot;ph&quot;>Mensagem</span>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;9&quot;/><path d=&quot;M9 14s1.2 1.5 3 1.5S15 14 15 14&quot; stroke-linecap=&quot;round&quot;/><circle cx=&quot;9&quot; cy=&quot;10&quot; r=&quot;1&quot; fill=&quot;currentColor&quot; stroke=&quot;none&quot;/><circle cx=&quot;15&quot; cy=&quot;10&quot; r=&quot;1&quot; fill=&quot;currentColor&quot; stroke=&quot;none&quot;/></svg>
+          </div>
+          <button class=&quot;wa-cam&quot; aria-label=&quot;Câmera&quot;>
+            <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M3 8a2 2 0 0 1 2-2h2l1.5-2h7L19 6h0a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z&quot;/><circle cx=&quot;12&quot; cy=&quot;13&quot; r=&quot;3.2&quot;/></svg>
+          </button>
+          <button class=&quot;wa-mic&quot; aria-label=&quot;Áudio&quot;>
+            <svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><rect x=&quot;9&quot; y=&quot;2&quot; width=&quot;6&quot; height=&quot;12&quot; rx=&quot;3&quot;/><path d=&quot;M5 11a7 7 0 0 0 14 0&quot;/><path d=&quot;M12 18v3&quot;/></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===================== AMOUNT VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;amountView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;lhead&quot;><button class=&quot;nav-btn&quot; id=&quot;amountBack&quot; aria-label=&quot;Voltar&quot;><svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg></button></div>
+        <div class=&quot;amt-main&quot;>
+          <h1>Quanto você quer<br/>depositar?</h1>
+          <div class=&quot;amt-field&quot;><span class=&quot;cur&quot;>R$</span><span class=&quot;val empty&quot; id=&quot;amtVal&quot;>0,00</span></div>
+          <button class=&quot;amt-continue&quot; id=&quot;amtContinue&quot; disabled>Continuar</button>
+        </div>
+        <div class=&quot;keypad&quot; id=&quot;amtKeypad&quot;>
+          <button class=&quot;key&quot; data-k=&quot;1&quot;>1</button><button class=&quot;key&quot; data-k=&quot;2&quot;>2</button><button class=&quot;key&quot; data-k=&quot;3&quot;>3</button>
+          <button class=&quot;key&quot; data-k=&quot;4&quot;>4</button><button class=&quot;key&quot; data-k=&quot;5&quot;>5</button><button class=&quot;key&quot; data-k=&quot;6&quot;>6</button>
+          <button class=&quot;key&quot; data-k=&quot;7&quot;>7</button><button class=&quot;key&quot; data-k=&quot;8&quot;>8</button><button class=&quot;key&quot; data-k=&quot;9&quot;>9</button>
+          <button class=&quot;key fn&quot; data-k=&quot;noop&quot;>,</button>
+          <button class=&quot;key&quot; data-k=&quot;0&quot;>0</button>
+          <button class=&quot;key fn&quot; data-k=&quot;del&quot; aria-label=&quot;Apagar&quot;><svg width=&quot;26&quot; height=&quot;20&quot; viewBox=&quot;0 0 28 22&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 3h15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9L1 11z&quot;/><path d=&quot;M14 8l6 6M20 8l-6 6&quot;/></svg></button>
+        </div>
+      </section>
+
+      <!-- ===================== INSTITUTION VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;institutionView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;lhead&quot;><button class=&quot;nav-btn&quot; id=&quot;instBack&quot; aria-label=&quot;Voltar&quot;><svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg></button></div>
+        <div class=&quot;inst-main&quot;>
+          <h1>De onde você quer trazer seu dinheiro?</h1>
+          <div class=&quot;inst-sub&quot;>O valor vai ser depositado na sua conta <b>Padaria do bairro</b>, CNPJ 64.304.392/0001-65.</div>
+          <div class=&quot;inst-search&quot;>
+            <svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;11&quot; cy=&quot;11&quot; r=&quot;7&quot;/><path d=&quot;M21 21l-4.3-4.3&quot;/></svg>
+            <span>Buscar instituição</span>
+          </div>
+          <div class=&quot;inst-list&quot;>
+            <div class=&quot;inst-row&quot; data-inst=&quot;Banco XP&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#0a0a0a&quot;>XP</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>Banco XP</div><div class=&quot;inst-meta&quot;>Disponível com 5 instituições</div></div><span class=&quot;ch&quot;>›</span></div>
+            <div class=&quot;inst-row&quot; data-inst=&quot;Banco Next&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#00a868&quot;>N</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>Banco Next</div><div class=&quot;inst-meta&quot;>Disponível com 1 instituição</div></div><span class=&quot;ch&quot;>›</span></div>
+            <div class=&quot;inst-row&quot; data-inst=&quot;B73 Banking&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#1768e0&quot;>B7</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>B73 Banking</div><div class=&quot;inst-meta&quot;>Disponível com 6 instituições</div></div><span class=&quot;ch&quot;>›</span></div>
+            <div class=&quot;inst-row&quot; data-inst=&quot;Bradesco Pessoa Jurídica&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#cc092f&quot;>B</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>Bradesco Pessoa Jurídica</div><div class=&quot;inst-meta&quot;>Disponível com 3 instituições</div></div><span class=&quot;ch&quot;>›</span></div>
+            <div class=&quot;inst-row&quot; data-inst=&quot;Mercado Pago&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#00b1ea&quot;>MP</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>Mercado Pago</div><div class=&quot;inst-meta&quot;>Disponível com 2 instituições</div></div><span class=&quot;ch&quot;>›</span></div>
+            <div class=&quot;inst-row&quot; data-inst=&quot;Nubank Instituição de Pagamentos S.A.&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#820ad1&quot;>Nu</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>Nubank Instituição de Pagamentos S.A.</div><div class=&quot;inst-meta&quot;>Disponível com 9 instituições</div></div><span class=&quot;ch&quot;>›</span></div>
+            <div class=&quot;inst-row&quot; data-inst=&quot;PicPay&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#11c76f&quot;>P</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>PicPay</div><div class=&quot;inst-meta&quot;>Disponível com 1 instituição</div></div><span class=&quot;ch&quot;>›</span></div>
+            <div class=&quot;inst-row&quot; data-inst=&quot;PicPay Empresas&quot;><div class=&quot;inst-logo&quot; style=&quot;background:#0b9c5a&quot;>PE</div><div class=&quot;inst-main-txt&quot;><div class=&quot;inst-name&quot;>PicPay Empresas</div><div class=&quot;inst-meta&quot;>Disponível com 3 instituições</div></div><span class=&quot;ch&quot;>›</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== DEPOSIT CONFIRM VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;depositView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;lhead&quot;><button class=&quot;nav-btn&quot; id=&quot;depBack&quot; aria-label=&quot;Voltar&quot;><svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg></button></div>
+        <div class=&quot;dep-body&quot;>
+          <div class=&quot;dep-h1&quot;>Confira os dados do depósito</div>
+          <div class=&quot;dep-sub&quot;>✨ Feito via Open Finance</div>
+          <div class=&quot;dep-label&quot;>Valor</div>
+          <div class=&quot;dep-amount&quot; id=&quot;depAmount&quot;>R$ 100,00</div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;heading&quot;>Detalhes da transação</div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Data do depósito</span><span class=&quot;v&quot;>Hoje, 8 ago 2024</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Iniciado por</span><span class=&quot;v&quot;>Iniciador</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Tarifa</span><span class=&quot;v&quot;>Grátis</span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Conta de origem</span><span class=&quot;v chev&quot; id=&quot;depOrigin&quot;>Nubank <span class=&quot;ch&quot;>›</span></span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;heading&quot;>Quem vai receber</div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Nome</span><span class=&quot;v&quot;>Padaria do bairro</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>CNPJ</span><span class=&quot;v&quot;>64.304.392/0001-65</span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;heading&quot;>Informação adicional <span class=&quot;link&quot;>Adicionar</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Descrição</span><span class=&quot;v&quot;>Sem descrição</span></div>
+          <div class=&quot;dep-note&quot; id=&quot;depNote&quot;>Ao continuar, vamos te redirecionar de forma segura para a instituição Nubank.</div>
+          <div class=&quot;dep-warn&quot;>Você vai ter <b>5 minutos</b> para confirmar a transferência na outra instituição. O depósito só vai ser feito se você tiver saldo disponível.</div>
+        </div>
+        <div class=&quot;dep-foot&quot;>
+          <button class=&quot;cta-green&quot; id=&quot;depContinue&quot;><span class=&quot;spin&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span><span>Continuar</span></button>
+        </div>
+      </section>
+
+      <!-- ===================== REDIRECT (part 1) VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;redirectView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>12:30</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;red-body&quot;>
+          <div class=&quot;red-anim&quot;>
+            <svg width=&quot;30&quot; height=&quot;30&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><rect x=&quot;6&quot; y=&quot;2&quot; width=&quot;12&quot; height=&quot;20&quot; rx=&quot;3&quot;/><path d=&quot;M11 18h2&quot;/></svg>
+            <span class=&quot;dot&quot;><span></span><span></span><span></span></span>
+            <svg width=&quot;30&quot; height=&quot;30&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M3 10l9-6 9 6&quot;/><path d=&quot;M5 10v9M19 10v9M9 10v9M15 10v9&quot;/><path d=&quot;M3 21h18&quot;/></svg>
+          </div>
+          <div class=&quot;red-title&quot;>Redirecionamento seguro</div>
+          <div class=&quot;red-sub&quot; id=&quot;redSub&quot;>Você está sendo redirecionado para a instituição de forma segura.</div>
+        </div>
+        <div class=&quot;of-mark&quot;>open<b>finance</b></div>
+      </section>
+
+      <!-- ===================== FACE ID VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;faceIdView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:04</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;face-body&quot; id=&quot;faceTap&quot;>
+          <div class=&quot;face-glyph&quot;>
+            <svg width=&quot;48&quot; height=&quot;48&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;#2DA56F&quot; stroke-width=&quot;1.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2&quot;/><path d=&quot;M9 10v1M15 10v1M9.5 15c.7.6 1.5.9 2.5.9s1.8-.3 2.5-.9&quot;/><path d=&quot;M12 10v3.5&quot;/></svg>
+          </div>
+          <div class=&quot;face-label&quot;>Face ID</div>
+          <div class=&quot;face-hint&quot;>Toque para autenticar</div>
+        </div>
+      </section>
+
+      <!-- ===================== AUTHORIZE VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;authorizeView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:04</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;nu-progress&quot;><span></span></div>
+        <div class=&quot;nu-top&quot;><button class=&quot;nu-close&quot; id=&quot;authCancelTop&quot; aria-label=&quot;Fechar&quot;><svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 6l12 12M18 6L6 18&quot;/></svg></button></div>
+        <div class=&quot;nu-body&quot;>
+          <div class=&quot;nu-h1&quot;>Pagando</div>
+          <div class=&quot;nu-amount&quot; id=&quot;authAmount&quot;>R$ 100,00</div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Titular</span><span class=&quot;v&quot;>Caroline Pinto Batista</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>CPF</span><span class=&quot;v&quot;>***.810.357-**</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Saldo da conta</span><span class=&quot;v&quot;>R$ 1.127,99</span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Tipo de transferência</span><span class=&quot;v&quot;>Pix via Open Finance</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Quando</span><span class=&quot;v&quot;>Hoje, 8 ago 2024</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Iniciado em</span><span class=&quot;v&quot;>Iniciador</span></div>
+        </div>
+        <div class=&quot;nu-foot&quot;>
+          <button class=&quot;nu-authorize&quot; id=&quot;authAuthorize&quot;>Autorizar</button>
+          <button class=&quot;nu-cancel&quot; id=&quot;authCancel&quot;>Cancelar</button>
+        </div>
+      </section>
+
+      <!-- ===================== REDIRECTING VIEW (part 2) ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;redirectingView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:04</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;rdg-body&quot;>
+          <div class=&quot;rdg-h1&quot;>Redirecionando...</div>
+          <div class=&quot;rdg-sub&quot;>Esta é uma etapa segura realizada através do Open Finance.</div>
+          <div class=&quot;rdg-steps&quot;>
+            <div class=&quot;rdg-step done&quot;><span class=&quot;bullet&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M5 12.5l4.5 4.5L19 7&quot;/></svg></span><span>Transferência autorizada</span></div>
+            <div class=&quot;rdg-step pending&quot;><span class=&quot;bullet spin&quot;><svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span><span>Indo para o outro app</span></div>
+          </div>
+        </div>
+        <div class=&quot;of-mark&quot;>open<b>finance</b></div>
+      </section>
+
+      <!-- ===================== BROWSER VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;browserView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:04</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;br-bar&quot;><div class=&quot;br-url&quot;><svg width=&quot;13&quot; height=&quot;13&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot;><rect x=&quot;5&quot; y=&quot;11&quot; width=&quot;14&quot; height=&quot;9&quot; rx=&quot;2&quot;/><path d=&quot;M8 11V8a4 4 0 0 1 8 0v3&quot;/></svg>cs.iniciador.com.br</div></div>
+        <div class=&quot;br-page&quot;>
+          <div class=&quot;br-dialog&quot;>
+            <div class=&quot;dh&quot;>Abrir esta página em “Stone”?</div>
+            <div class=&quot;db&quot;><button id=&quot;brCancel&quot;>Cancelar</button><button class=&quot;bold&quot; id=&quot;brOpen&quot;>Abrir</button></div>
+          </div>
+        </div>
+        <div class=&quot;br-toolbar&quot;>
+          <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg>
+          <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 18l6-6-6-6&quot;/></svg>
+          <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M12 16V4M8 8l4-4 4 4&quot;/><path d=&quot;M5 16v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2&quot;/></svg>
+          <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M4 4h13a2 2 0 0 1 2 2v14l-4-3H6a2 2 0 0 1-2-2z&quot;/></svg>
+          <svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><rect x=&quot;4&quot; y=&quot;4&quot; width=&quot;7&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;13&quot; y=&quot;4&quot; width=&quot;7&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;4&quot; y=&quot;13&quot; width=&quot;7&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;13&quot; y=&quot;13&quot; width=&quot;7&quot; height=&quot;7&quot; rx=&quot;1&quot;/></svg>
+        </div>
+      </section>
+
+      <!-- ===================== FINALIZING VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;finalizingView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:04</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;fin-body&quot;>
+          <span class=&quot;fin-spin&quot;><svg width=&quot;40&quot; height=&quot;40&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span>
+          <div class=&quot;fin-text&quot;>Finalizando em alguns instantes</div>
+        </div>
+      </section>
+
+      <!-- ===================== DEPOSIT DONE VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;depositDoneView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:04</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;dd-body&quot;>
+          <div class=&quot;dd-check&quot;><svg width=&quot;30&quot; height=&quot;30&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/><path d=&quot;M8 12.5l2.5 2.5L16 9.5&quot;/></svg></div>
+          <div class=&quot;dd-title&quot;>Seu depósito já foi feito</div>
+          <div class=&quot;dd-label&quot;>Valor</div>
+          <div class=&quot;dd-amount&quot; id=&quot;ddAmount&quot;>R$ 100,00</div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;heading&quot;>Conta de origem</div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Nome</span><span class=&quot;v&quot;>Caroline Pinto Batista</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>CPF/CNPJ</span><span class=&quot;v&quot;>***.810.357-**</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Instituição</span><span class=&quot;v&quot; id=&quot;ddInst&quot;>Nubank</span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;heading&quot;>Detalhes da transação</div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Tipo</span><span class=&quot;v&quot;>Pix via Open Finance</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Iniciado por</span><span class=&quot;v&quot;>Iniciador</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Descrição</span><span class=&quot;v&quot;>Sem descrição</span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;heading&quot;>Quem recebeu</div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Nome</span><span class=&quot;v&quot;>Padaria do bairro</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>CNPJ</span><span class=&quot;v&quot;>64.304.392/0001-65</span></div>
+        </div>
+        <div class=&quot;dd-foot&quot;><button class=&quot;cta-green&quot; id=&quot;goBoleto&quot;>Ir para o extrato</button></div>
+      </section>
+
+      <!-- ===================== BOLETO VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;boletoView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:05</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;lhead&quot;><button class=&quot;nav-btn&quot; id=&quot;boletoBack&quot; aria-label=&quot;Voltar&quot;><svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg></button></div>
+        <div class=&quot;bol-body&quot;>
+          <div class=&quot;bol-h1&quot;>Enviando pagamento para <span class=&quot;co&quot;>GUILHOR CONSTRUÇÕES E FUNDAÇÃO LTDA</span></div>
+          <div class=&quot;bol-sub&quot;>Stone Pagamentos S.A. · 12.123.123/0001-00</div>
+          <div class=&quot;bol-section&quot;><div class=&quot;bol-label&quot;>Valor a pagar</div><div class=&quot;bol-amount&quot;>R$ 12.000,00</div></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Saldo disponível</span><span class=&quot;v&quot; id=&quot;bolSaldo&quot;>R$ 12.100,00</span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;heading&quot;>Data</div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Quando você vai pagar?</span><span class=&quot;v&quot;>Hoje, 8 ago 2024</span></div>
+          <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Vence em</span><span class=&quot;v&quot;>Amanhã, 9 ago 2024</span></div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;bol-acc&quot; id=&quot;accReceiver&quot;>
+            <div class=&quot;bol-acc-head&quot; data-acc><span class=&quot;t&quot;>Quem vai receber</span><span class=&quot;chev&quot;><svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 15l6-6 6 6&quot;/></svg></span></div>
+            <div class=&quot;bol-acc-body&quot;>
+              <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Nome</span><span class=&quot;v&quot;>Guilhor Construções e Fundação LTDA</span></div>
+              <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>CPF/CNPJ</span><span class=&quot;v&quot;>12.123.123/0001-00</span></div>
+              <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Instituição</span><span class=&quot;v&quot;>Stone Pagamentos S.A</span></div>
+            </div>
+          </div>
+          <div class=&quot;divider&quot;></div>
+          <div class=&quot;bol-acc&quot; id=&quot;accInfo&quot;>
+            <div class=&quot;bol-acc-head&quot; data-acc><span class=&quot;t&quot;>Informação adicional</span><span class=&quot;chev&quot;><svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 15l6-6 6 6&quot;/></svg></span></div>
+            <div class=&quot;bol-acc-body&quot;>
+              <div class=&quot;bol-code-label&quot;>Código do boleto</div>
+              <div class=&quot;bol-code&quot;>34191.7900101043.510047 91020.150008 1 99 620026000 9876534</div>
+            </div>
+          </div>
+        </div>
+        <div class=&quot;bol-foot&quot;><button class=&quot;cta-green&quot; id=&quot;confirmPay&quot;><span class=&quot;spin&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span><span>Confirmar pagamento</span></button></div>
+      </section>
+
+      <!-- ===================== PIN VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;pinView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:05</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;lhead&quot;><button class=&quot;nav-btn&quot; id=&quot;pinBack&quot; aria-label=&quot;Voltar&quot;><svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M15 18l-6-6 6-6&quot;/></svg></button></div>
+        <div class=&quot;pin-main&quot;>
+          <h1>Digite sua senha</h1>
+          <div class=&quot;pin-boxes&quot; id=&quot;pinBoxes&quot;><div class=&quot;pin-box&quot;></div><div class=&quot;pin-box&quot;></div><div class=&quot;pin-box&quot;></div><div class=&quot;pin-box&quot;></div><div class=&quot;pin-box&quot;></div><div class=&quot;pin-box&quot;></div></div>
+          <button class=&quot;continuar&quot; id=&quot;continuar&quot; disabled><span class=&quot;spin&quot;><svg width=&quot;16&quot; height=&quot;16&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.4&quot; stroke-linecap=&quot;round&quot;><path d=&quot;M21 12a9 9 0 1 1-6.2-8.6&quot;/></svg></span><span>Continuar</span></button>
+        </div>
+        <div class=&quot;keypad&quot; id=&quot;keypad&quot;>
+          <button class=&quot;key&quot; data-k=&quot;1&quot;>1</button><button class=&quot;key&quot; data-k=&quot;2&quot;>2</button><button class=&quot;key&quot; data-k=&quot;3&quot;>3</button>
+          <button class=&quot;key&quot; data-k=&quot;4&quot;>4</button><button class=&quot;key&quot; data-k=&quot;5&quot;>5</button><button class=&quot;key&quot; data-k=&quot;6&quot;>6</button>
+          <button class=&quot;key&quot; data-k=&quot;7&quot;>7</button><button class=&quot;key&quot; data-k=&quot;8&quot;>8</button><button class=&quot;key&quot; data-k=&quot;9&quot;>9</button>
+          <button class=&quot;key blank&quot; tabindex=&quot;-1&quot;></button>
+          <button class=&quot;key&quot; data-k=&quot;0&quot;>0</button>
+          <button class=&quot;key fn&quot; data-k=&quot;del&quot; aria-label=&quot;Apagar&quot;><svg width=&quot;26&quot; height=&quot;20&quot; viewBox=&quot;0 0 28 22&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.6&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M9 3h15a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9L1 11z&quot;/><path d=&quot;M14 8l6 6M20 8l-6 6&quot;/></svg></button>
+        </div>
+      </section>
+
+      <!-- ===================== SUCCESS VIEW ===================== -->
+      <section class=&quot;view hidden&quot; id=&quot;successView&quot;>
+        <div class=&quot;statusbar&quot;>
+          <span class=&quot;time&quot;>16:05</span>
+          <span class=&quot;icons&quot;>
+            <svg width=&quot;18&quot; height=&quot;12&quot; viewBox=&quot;0 0 18 12&quot; fill=&quot;currentColor&quot;><rect x=&quot;0&quot; y=&quot;8&quot; width=&quot;3&quot; height=&quot;4&quot; rx=&quot;1&quot;/><rect x=&quot;5&quot; y=&quot;5&quot; width=&quot;3&quot; height=&quot;7&quot; rx=&quot;1&quot;/><rect x=&quot;10&quot; y=&quot;2.5&quot; width=&quot;3&quot; height=&quot;9.5&quot; rx=&quot;1&quot;/><rect x=&quot;15&quot; y=&quot;0&quot; width=&quot;3&quot; height=&quot;12&quot; rx=&quot;1&quot;/></svg>
+            <svg width=&quot;17&quot; height=&quot;12&quot; viewBox=&quot;0 0 17 12&quot; fill=&quot;currentColor&quot;><path d=&quot;M8.5 2C5.6 2 2.9 3 1 4.8l1.4 1.5C4 4.8 6.2 4 8.5 4s4.5.8 6.1 2.3L16 4.8C14.1 3 11.4 2 8.5 2z&quot;/><path d=&quot;M8.5 6.2c-1.6 0-3.1.6-4.3 1.7l1.5 1.5c.8-.7 1.8-1.1 2.8-1.1s2 .4 2.8 1.1l1.5-1.5C11.6 6.8 10.1 6.2 8.5 6.2z&quot;/><circle cx=&quot;8.5&quot; cy=&quot;11&quot; r=&quot;1.4&quot;/></svg>
+            <svg width=&quot;26&quot; height=&quot;13&quot; viewBox=&quot;0 0 26 13&quot; fill=&quot;none&quot;><rect x=&quot;1&quot; y=&quot;1&quot; width=&quot;21&quot; height=&quot;11&quot; rx=&quot;3&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.2&quot;/><rect x=&quot;2.5&quot; y=&quot;2.5&quot; width=&quot;17&quot; height=&quot;8&quot; rx=&quot;1.8&quot; fill=&quot;currentColor&quot;/><rect x=&quot;23.5&quot; y=&quot;4&quot; width=&quot;2&quot; height=&quot;5&quot; rx=&quot;1&quot; fill=&quot;currentColor&quot;/></svg>
+          </span>
+        </div>
+        <div class=&quot;lhead&quot;><button class=&quot;nav-btn&quot; id=&quot;successClose&quot; aria-label=&quot;Fechar&quot;><svg width=&quot;22&quot; height=&quot;22&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><path d=&quot;M6 6l12 12M18 6L6 18&quot;/></svg></button></div>
+        <div class=&quot;suc-body&quot;>
+          <div class=&quot;suc-card&quot;>
+            <div class=&quot;suc-check&quot;><svg width=&quot;34&quot; height=&quot;34&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;><circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;10&quot;/><path d=&quot;M8 12.5l2.5 2.5L16 9.5&quot;/></svg></div>
+            <div class=&quot;suc-title&quot;>Pagamento enviado</div>
+            <div class=&quot;suc-valrow&quot;><div><div class=&quot;suc-vallabel&quot;>Valor</div><div class=&quot;suc-amount&quot;>R$ 12.000,00</div><div class=&quot;suc-date&quot;>8 ago 2024 às 16:05</div></div><span class=&quot;badge&quot;>Saldo em Conta</span></div>
+            <div class=&quot;suc-note&quot;>O pagamento foi enviado e vai ser confirmado <b>em até 1 dia útil</b>. Vamos te avisar por e-mail.</div>
+            <div class=&quot;divider&quot;></div>
+            <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Nome</span><span class=&quot;v&quot;>Guilhor Construções e Fundação LTDA</span></div>
+            <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>CPF/CNPJ</span><span class=&quot;v&quot;>12.123.123/0001-00</span></div>
+            <div class=&quot;row-kv&quot;><span class=&quot;k&quot;>Instituição</span><span class=&quot;v&quot;>Stone Pagamentos S.A.</span></div>
+          </div>
+          <div class=&quot;suc-foot&quot;>
+            <button class=&quot;suc-btn green&quot;>Compartilhar comprovante</button>
+            <button class=&quot;suc-btn outline&quot; id=&quot;restart&quot;>Fazer outro pagamento</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+(function () {
+  &quot;use strict&quot;;
+
+  /* -------------------- DOM refs -------------------- */
+  const whatsAppView = document.getElementById(&quot;whatsAppView&quot;);
+  const amountView = document.getElementById(&quot;amountView&quot;);
+  const institutionView = document.getElementById(&quot;institutionView&quot;);
+  const depositView = document.getElementById(&quot;depositView&quot;);
+  const redirectView = document.getElementById(&quot;redirectView&quot;);
+  const faceIdView = document.getElementById(&quot;faceIdView&quot;);
+  const authorizeView = document.getElementById(&quot;authorizeView&quot;);
+  const redirectingView = document.getElementById(&quot;redirectingView&quot;);
+  const browserView = document.getElementById(&quot;browserView&quot;);
+  const finalizingView = document.getElementById(&quot;finalizingView&quot;);
+  const depositDoneView = document.getElementById(&quot;depositDoneView&quot;);
+  const boletoView = document.getElementById(&quot;boletoView&quot;);
+  const pinView = document.getElementById(&quot;pinView&quot;);
+  const successView = document.getElementById(&quot;successView&quot;);
+  const allViews = [whatsAppView, amountView, institutionView, depositView, redirectView,
+    faceIdView, authorizeView, redirectingView, browserView, finalizingView,
+    depositDoneView, boletoView, pinView, successView];
+
+  function showView(el) {
+    allViews.forEach(function (v) { v.classList.add(&quot;hidden&quot;); });
+    el.classList.remove(&quot;hidden&quot;);
+  }
+
+  /* -------------------- Shared state -------------------- */
+  const STONE_BASE = 300000; // R$ 3.000,00 starting Stone balance, in cents
+  let cents = 0;
+  let institution = &quot;Nubank&quot;;
+
+  function formatBRL(c) {
+    var s = (c / 100).toFixed(2).split(&quot;.&quot;);
+    var intp = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, &quot;.&quot;);
+    return intp + &quot;,&quot; + s[1];
+  }
+
+  /* -------------------- WhatsApp → Amount -------------------- */
+  document.getElementById(&quot;goAmount&quot;).addEventListener(&quot;click&quot;, function () { showView(amountView); });
+  document.getElementById(&quot;amountBack&quot;).addEventListener(&quot;click&quot;, function () { showView(whatsAppView); });
+
+  /* -------------------- Amount entry -------------------- */
+  const amtVal = document.getElementById(&quot;amtVal&quot;);
+  const amtContinue = document.getElementById(&quot;amtContinue&quot;);
+  const amtKeypad = document.getElementById(&quot;amtKeypad&quot;);
+
+  function renderAmount() {
+    amtVal.textContent = formatBRL(cents);
+    amtVal.classList.toggle(&quot;empty&quot;, cents === 0);
+    const ok = cents > 0;
+    amtContinue.classList.toggle(&quot;enabled&quot;, ok);
+    amtContinue.disabled = !ok;
+  }
+  amtKeypad.addEventListener(&quot;click&quot;, function (e) {
+    const key = e.target.closest(&quot;[data-k]&quot;);
+    if (!key) return;
+    const k = key.getAttribute(&quot;data-k&quot;);
+    if (k === &quot;del&quot;) cents = Math.floor(cents / 10);
+    else if (k === &quot;noop&quot;) return;
+    else if (cents < 1e11) cents = cents * 10 + parseInt(k, 10);
+    renderAmount();
+  });
+  document.addEventListener(&quot;keydown&quot;, function (e) {
+    if (amountView.classList.contains(&quot;hidden&quot;)) return;
+    if (e.key >= &quot;0&quot; &amp;&amp; e.key <= &quot;9&quot;) { if (cents < 1e11) cents = cents * 10 + parseInt(e.key, 10); renderAmount(); }
+    else if (e.key === &quot;Backspace&quot;) { cents = Math.floor(cents / 10); renderAmount(); }
+    else if (e.key === &quot;Enter&quot; &amp;&amp; cents > 0) showView(institutionView);
+  });
+  amtContinue.addEventListener(&quot;click&quot;, function () { if (cents > 0) showView(institutionView); });
+
+  /* -------------------- Institution pick → Deposit confirm -------------------- */
+  document.getElementById(&quot;instBack&quot;).addEventListener(&quot;click&quot;, function () { showView(amountView); });
+  document.querySelectorAll(&quot;.inst-row&quot;).forEach(function (row) {
+    row.addEventListener(&quot;click&quot;, function () {
+      institution = row.getAttribute(&quot;data-inst&quot;);
+      hydrateDeposit();
+      showView(depositView);
+    });
+  });
+
+  /* -------------------- Deposit confirm -------------------- */
+  const depAmount = document.getElementById(&quot;depAmount&quot;);
+  const depOrigin = document.getElementById(&quot;depOrigin&quot;);
+  const depNote = document.getElementById(&quot;depNote&quot;);
+  const depContinue = document.getElementById(&quot;depContinue&quot;);
+
+  function shortInst() { return institution.split(&quot; Instituição&quot;)[0]; }
+
+  function hydrateDeposit() {
+    depAmount.textContent = &quot;R$ &quot; + formatBRL(cents);
+    depOrigin.innerHTML = shortInst() + ' <span class=&quot;ch&quot;>›</span>';
+    depNote.textContent = &quot;Ao continuar, vamos te redirecionar de forma segura para a instituição &quot; + shortInst() + &quot;.&quot;;
+  }
+
+  document.getElementById(&quot;depBack&quot;).addEventListener(&quot;click&quot;, function () { showView(institutionView); });
+
+  depContinue.addEventListener(&quot;click&quot;, function () {
+    depContinue.classList.add(&quot;loading&quot;);
+    setTimeout(function () {
+      depContinue.classList.remove(&quot;loading&quot;);
+      document.getElementById(&quot;redSub&quot;).textContent =
+        &quot;Você está sendo redirecionado para a instituição &quot; + shortInst() + &quot; de forma segura.&quot;;
+      showView(redirectView);
+      // part 1 → part 2 handoff: land in the other institution's app
+      setTimeout(function () { hydrateAuthorize(); showView(faceIdView); }, 1900);
+    }, 1000);
+  });
+
+  /* -------------------- Face ID → Authorize -------------------- */
+  document.getElementById(&quot;faceTap&quot;).addEventListener(&quot;click&quot;, function () { showView(authorizeView); });
+
+  function hydrateAuthorize() {
+    document.getElementById(&quot;authAmount&quot;).textContent = &quot;R$ &quot; + formatBRL(cents);
+  }
+
+  /* -------------------- Authorize → Redirecting -------------------- */
+  const authAuthorize = document.getElementById(&quot;authAuthorize&quot;);
+  authAuthorize.addEventListener(&quot;click&quot;, function () {
+    authAuthorize.classList.add(&quot;loading&quot;);
+    authAuthorize.textContent = &quot;Autorizando...&quot;;
+    setTimeout(function () {
+      authAuthorize.classList.remove(&quot;loading&quot;);
+      authAuthorize.textContent = &quot;Autorizar&quot;;
+      showView(redirectingView);
+      setTimeout(function () { showView(browserView); }, 1700);
+    }, 900);
+  });
+  function cancelAuth() { showView(faceIdView); }
+  document.getElementById(&quot;authCancel&quot;).addEventListener(&quot;click&quot;, cancelAuth);
+  document.getElementById(&quot;authCancelTop&quot;).addEventListener(&quot;click&quot;, cancelAuth);
+
+  /* -------------------- Browser dialog -------------------- */
+  document.getElementById(&quot;brOpen&quot;).addEventListener(&quot;click&quot;, function () {
+    showView(finalizingView);
+    setTimeout(function () { hydrateDepositDone(); showView(depositDoneView); }, 1700);
+  });
+  document.getElementById(&quot;brCancel&quot;).addEventListener(&quot;click&quot;, function () { showView(redirectingView); });
+
+  function hydrateDepositDone() {
+    document.getElementById(&quot;ddAmount&quot;).textContent = &quot;R$ &quot; + formatBRL(cents);
+    document.getElementById(&quot;ddInst&quot;).textContent = shortInst();
+  }
+
+  /* -------------------- Deposit done → Boleto -------------------- */
+  document.getElementById(&quot;goBoleto&quot;).addEventListener(&quot;click&quot;, function () {
+    document.getElementById(&quot;bolSaldo&quot;).textContent = &quot;R$ &quot; + formatBRL(STONE_BASE + cents);
+    showView(boletoView);
+  });
+  document.getElementById(&quot;boletoBack&quot;).addEventListener(&quot;click&quot;, function () { showView(depositDoneView); });
+
+  /* -------------------- Boleto accordions -------------------- */
+  document.querySelectorAll(&quot;.bol-acc-head&quot;).forEach(function (head) {
+    head.addEventListener(&quot;click&quot;, function () { head.closest(&quot;.bol-acc&quot;).classList.toggle(&quot;collapsed&quot;); });
+  });
+
+  /* -------------------- Confirm payment → PIN -------------------- */
+  const confirmPay = document.getElementById(&quot;confirmPay&quot;);
+  confirmPay.addEventListener(&quot;click&quot;, function () {
+    confirmPay.classList.add(&quot;loading&quot;);
+    setTimeout(function () { confirmPay.classList.remove(&quot;loading&quot;); openPin(); }, 900);
+  });
+
+  /* -------------------- PIN flow -------------------- */
+  const boxes = Array.prototype.slice.call(document.querySelectorAll(&quot;.pin-box&quot;));
+  const continuar = document.getElementById(&quot;continuar&quot;);
+  const keypad = document.getElementById(&quot;keypad&quot;);
+  let pin = &quot;&quot;;
+
+  function openPin() { pin = &quot;&quot;; renderPin(); showView(pinView); }
+  function renderPin() {
+    boxes.forEach(function (b, i) {
+      b.classList.toggle(&quot;filled&quot;, i < pin.length);
+      b.classList.toggle(&quot;active&quot;, i === pin.length &amp;&amp; pin.length < 6);
+    });
+    const full = pin.length === 6;
+    continuar.classList.toggle(&quot;enabled&quot;, full);
+    continuar.disabled = !full;
+  }
+  function pushDigit(d) { if (pin.length >= 6) return; pin += d; renderPin(); }
+  function popDigit() { pin = pin.slice(0, -1); renderPin(); }
+
+  keypad.addEventListener(&quot;click&quot;, function (e) {
+    const key = e.target.closest(&quot;[data-k]&quot;);
+    if (!key) return;
+    const k = key.getAttribute(&quot;data-k&quot;);
+    if (k === &quot;del&quot;) popDigit(); else pushDigit(k);
+  });
+  document.addEventListener(&quot;keydown&quot;, function (e) {
+    if (pinView.classList.contains(&quot;hidden&quot;)) return;
+    if (e.key >= &quot;0&quot; &amp;&amp; e.key <= &quot;9&quot;) pushDigit(e.key);
+    else if (e.key === &quot;Backspace&quot;) popDigit();
+    else if (e.key === &quot;Enter&quot; &amp;&amp; pin.length === 6) submitPin();
+  });
+  document.getElementById(&quot;pinBack&quot;).addEventListener(&quot;click&quot;, function () { showView(boletoView); });
+  continuar.addEventListener(&quot;click&quot;, submitPin);
+  function submitPin() {
+    if (pin.length !== 6) return;
+    continuar.classList.add(&quot;loading&quot;);
+    setTimeout(function () { continuar.classList.remove(&quot;loading&quot;); showView(successView); }, 1100);
+  }
+
+  /* -------------------- Success → restart -------------------- */
+  function restart() {
+    cents = 0; institution = &quot;Nubank&quot;; pin = &quot;&quot;;
+    renderAmount(); renderPin();
+    document.querySelectorAll(&quot;.bol-acc&quot;).forEach(function (a) { a.classList.remove(&quot;collapsed&quot;); });
+    showView(whatsAppView);
+  }
+  document.getElementById(&quot;successClose&quot;).addEventListener(&quot;click&quot;, restart);
+  document.getElementById(&quot;restart&quot;).addEventListener(&quot;click&quot;, restart);
+
+  /* -------------------- Boot -------------------- */
+  showView(whatsAppView);
+  renderAmount();
+  renderPin();
+})();
+</script>
+</body>
+</html>
+"></iframe>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      var tabs = document.querySelectorAll(".tab");
+      var frames = document.querySelectorAll(".frame");
+      document.querySelector(".tabbar").addEventListener("click", function (e) {
+        var btn = e.target.closest(".tab");
+        if (!btn) return;
+        var id = btn.getAttribute("data-target");
+        tabs.forEach(function (t) { t.classList.toggle("active", t === btn); });
+        frames.forEach(function (f) { f.classList.toggle("hidden", f.id !== id); });
+      });
+    })();
+  </script>
+</body>
+</html>
