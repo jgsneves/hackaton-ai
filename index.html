@@ -394,7 +394,7 @@
   }
   .pin-back:active { background: #f0f0f0; }
 
-  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; }
+  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; display: flex; flex-direction: column; }
   .pin-main h1 { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
   .pin-main .sub { margin-top: 8px; color: var(--muted); font-size: 14px; }
 
@@ -427,7 +427,8 @@
   .pin-box.caret { border-color: var(--pin-active); }
 
   .continuar {
-    margin-top: 30px;
+    margin-top: auto;
+    margin-bottom: 18px;
     width: 100%;
     border: 0;
     border-radius: 26px;
@@ -1517,7 +1518,7 @@
   }
   .pin-back:active { background: #f0f0f0; }
 
-  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; }
+  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; display: flex; flex-direction: column; }
   .pin-main h1 { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
   .pin-main .sub { margin-top: 8px; color: var(--muted); font-size: 14px; }
 
@@ -1536,7 +1537,7 @@
   @keyframes pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
 
   .continuar {
-    margin-top: 30px; width: 100%; border: 0; border-radius: 26px; padding: 15px;
+    margin-top: auto; margin-bottom: 18px; width: 100%; border: 0; border-radius: 26px; padding: 15px;
     font-family: inherit; font-size: 15px; font-weight: 700;
     background: #EDEDED; color: #B5B5B5; cursor: not-allowed;
     display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -1595,7 +1596,7 @@
   .suc-note { font-size: 13px; line-height: 1.55; color: #3a4a43; margin-top: 16px; }
   .suc-divider { height: 1px; background: #EFEFEF; margin: 16px 0; }
 
-  .suc-foot { margin-top: 16px; }
+  .suc-foot { margin-top: auto; padding-top: 16px; }
   .suc-btn {
     width: 100%; border-radius: 26px; padding: 15px;
     font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; border: 0;
@@ -2232,14 +2233,14 @@
 
   /* ===================== PIN VIEW ===================== */
   #pinView { background: #fff; } #pinView .statusbar { color: #111; }
-  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; }
+  .pin-main { flex: 1 1 auto; padding: 18px 28px 0; display: flex; flex-direction: column; }
   .pin-main h1 { font-size: 24px; font-weight: 800; letter-spacing: -.4px; }
   .pin-boxes { display: flex; gap: 10px; margin-top: 30px; }
   .pin-box { flex: 1; aspect-ratio: 1 / 1.15; max-width: 46px; border: 1.5px solid #D7DEDB; border-radius: 9px; display: grid; place-items: center; transition: border-color .18s ease, box-shadow .18s ease; }
   .pin-box.active { border-color: var(--accent-strong); box-shadow: 0 0 0 3px rgba(45,165,111,.14); }
   .pin-box.filled::after { content: &quot;&quot;; width: 11px; height: 11px; border-radius: 50%; background: var(--ink); animation: popdot .18s ease; }
   @keyframes popdot { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
-  .continuar { margin-top: 28px; width: 100%; border: 0; border-radius: 26px; padding: 15px; font-family: inherit; font-size: 15px; font-weight: 700; background: #EDEDED; color: #B5B5B5; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s ease, color .2s ease; }
+  .continuar { margin-top: auto; margin-bottom: 18px; width: 100%; border: 0; border-radius: 26px; padding: 15px; font-family: inherit; font-size: 15px; font-weight: 700; background: #EDEDED; color: #B5B5B5; cursor: not-allowed; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s ease, color .2s ease; }
   .continuar.enabled { background: var(--cta-green); color: #fff; cursor: pointer; }
   .continuar.enabled:active { transform: scale(.99); }
   .continuar .spin { display: none; }
@@ -2260,7 +2261,7 @@
   .suc-date { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .badge { background: #EAF4EE; color: #2a6b4f; font-size: 11px; font-weight: 700; padding: 5px 11px; border-radius: 20px; white-space: nowrap; }
   .suc-note { font-size: 13px; line-height: 1.55; color: #3a4a43; margin-top: 16px; }
-  .suc-foot { margin-top: 16px; }
+  .suc-foot { margin-top: auto; padding-top: 16px; }
   .suc-btn { width: 100%; border-radius: 26px; padding: 15px; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; border: 0; transition: transform .12s ease; }
   .suc-btn:active { transform: scale(.99); }
   .suc-btn.green { background: var(--cta-green); color: #fff; }
